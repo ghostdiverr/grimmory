@@ -12,14 +12,12 @@ import org.booklore.service.appsettings.AppSettingService;
 import org.booklore.service.metadata.parser.babelio.BabelioBookDetails;
 import org.booklore.service.metadata.parser.babelio.BabelioSearchResult;
 import org.booklore.util.BookUtils;
+import org.jsoup.Connection;
+import org.jsoup.Jsoup;
 import org.springframework.stereotype.Service;
 import tools.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -33,10 +31,6 @@ public class BabelioBookParser implements BookParser, DetailedMetadataProvider {
     private static final String USER_AGENT = "2.0.138.2";
     private static final String BOUNDARY = "GrimmoryBoundary";
     private static final String CRLF = "\r\n";
-
-    private static final HttpClient HTTP_CLIENT = HttpClient.newBuilder()
-            .followRedirects(HttpClient.Redirect.NORMAL)
-            .build();
 
     private final AppSettingService appSettingService;
     private final ObjectMapper objectMapper;
@@ -84,8 +78,8 @@ public class BabelioBookParser implements BookParser, DetailedMetadataProvider {
             throw e;
         } catch (Exception e) {
             log.error("Babelio: search failed for term={}", term, e);
-            return null;
         }
+        return null;
     }
 
     private BookMetadata fetchAndBuildMetadata(String babelioId) {
@@ -147,23 +141,21 @@ public class BabelioBookParser implements BookParser, DetailedMetadataProvider {
     }
 
     private String post(MetadataProviderSettings.Babelio settings, Map<String, String> extraFields)
-            throws IOException, InterruptedException {
+            throws IOException {
         Map<String, String> fields = new LinkedHashMap<>();
         fields.put("user_id", settings.getUserId());
         fields.put("session_id", settings.getSessionId());
         fields.put("timestamp", String.valueOf(System.currentTimeMillis()));
         fields.putAll(extraFields);
 
-        String body = buildMultipartBody(fields);
-
-        HttpRequest httpRequest = HttpRequest.newBuilder()
-                .uri(URI.create(API_URL))
+        Connection.Response response = Jsoup.connect(API_URL)
                 .header("User-Agent", USER_AGENT)
                 .header("Content-Type", "multipart/form-data; boundary=" + BOUNDARY)
-                .POST(HttpRequest.BodyPublishers.ofString(body))
-                .build();
+                .method(Connection.Method.POST)
+                .requestBody(buildMultipartBody(fields))
+                .ignoreContentType(true)
+                .execute();
 
-        HttpResponse<String> response = HTTP_CLIENT.send(httpRequest, HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() != 200) {
             throw new IOException("Babelio API returned HTTP " + response.statusCode());
         }

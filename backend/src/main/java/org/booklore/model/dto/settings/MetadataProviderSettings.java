@@ -15,6 +15,7 @@ public class MetadataProviderSettings {
     @JsonProperty("lubimyczytac")
     private Lubimyczytac lubimyczytac;
     private Audible audible;
+    private Babelio babelio;
 
     @Data
     public static class Amazon {
@@ -66,5 +67,12 @@ public class MetadataProviderSettings {
     public static class Audible {
         private boolean enabled;
         private String domain;
+    }
+
+    @Data
+    public static class Babelio {
+        private boolean enabled;
+        private String userId;
+        private String sessionId;
     }
 }

@@ -128,6 +128,37 @@
 
             <div class="setting-item">
               <div class="setting-header">
+                <p-toggleswitch
+                  [(ngModel)]="babelioEnabled"
+                  [disabled]="!babelioUserId || !babelioSessionId">
+                </p-toggleswitch>
+                <span class="setting-label">Babelio</span>
+              </div>
+              <div class="setting-options">
+                <div class="config-field">
+                  <span class="config-label">{{ t('babelioUserIdLabel') }}</span>
+                  <p class="config-description">{{ t('babelioDesc') }}</p>
+                  <input
+                    type="text"
+                    pInputText
+                    [placeholder]="t('babelioUserIdPlaceholder')"
+                    [(ngModel)]="babelioUserId"
+                    class="config-input"/>
+                </div>
+                <div class="config-field">
+                  <span class="config-label">{{ t('babelioSessionIdLabel') }}</span>
+                  <input
+                    type="password"
+                    pInputText
+                    [placeholder]="t('babelioSessionIdPlaceholder')"
+                    [(ngModel)]="babelioSessionId"
+                    class="config-input"/>
+                </div>
+              </div>
+            </div>
+
+            <div class="setting-item">
+              <div class="setting-header">
                 <p-toggleswitch [(ngModel)]="audibleEnabled"></p-toggleswitch>
                 <span class="setting-label">Audible</span>
               </div>

@@ -61,7 +61,12 @@
     "googleApiPlaceholder": "Enter Google Books API key",
     "apiToken": "API Token",
     "hardcoverPlaceholder": "Enter Hardcover API token",
-    "comicvinePlaceholder": "Enter Comic Vine API token"
+    "comicvinePlaceholder": "Enter Comic Vine API token",
+    "babelioDesc": "Babelio requires a user ID and session ID from your account. Find them by inspecting your browser's network requests on babelio.com.",
+    "babelioUserIdLabel": "User ID",
+    "babelioUserIdPlaceholder": "Enter your Babelio user ID",
+    "babelioSessionIdLabel": "Session ID",
+    "babelioSessionIdPlaceholder": "Enter your Babelio session ID"
   },
   "publicReviews": {
     "sectionTitle": "Public Reviews",

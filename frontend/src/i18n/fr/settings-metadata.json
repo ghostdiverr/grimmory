@@ -59,7 +59,12 @@
     "googleApiPlaceholder": "Entrez la clé API Google Books",
     "apiToken": "Jeton API",
     "hardcoverPlaceholder": "Entrez le jeton API Hardcover",
-    "comicvinePlaceholder": "Entrez le jeton API Comic Vine"
+    "comicvinePlaceholder": "Entrez le jeton API Comic Vine",
+    "babelioDesc": "Babelio nécessite un identifiant utilisateur et un identifiant de session issus de votre compte. Retrouvez-les en inspectant les requêtes réseau de votre navigateur sur babelio.com.",
+    "babelioUserIdLabel": "Identifiant utilisateur",
+    "babelioUserIdPlaceholder": "Entrez votre identifiant utilisateur Babelio",
+    "babelioSessionIdLabel": "Identifiant de session",
+    "babelioSessionIdPlaceholder": "Entrez votre identifiant de session Babelio"
   },
   "fieldSelector": {
     "sectionTitle": "Champs activés dans l'éditeur et le sélecteur de métadonnées",

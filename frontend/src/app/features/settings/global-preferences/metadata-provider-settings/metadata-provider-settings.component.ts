@@ -97,6 +97,9 @@ export class MetadataProviderSettingsComponent {
   lubimyCzytacEnabled: boolean = false;
   ranobedbEnabled: boolean = false;
   googleApiKey: string = '';
+  babelioEnabled: boolean = false;
+  babelioUserId: string = '';
+  babelioSessionId: string = '';
 
   private appSettingsService = inject(AppSettingsService);
   private messageService = inject(MessageService);
@@ -128,6 +131,9 @@ export class MetadataProviderSettingsComponent {
     this.ranobedbEnabled = metadataProviderSettings?.ranobedb?.enabled ?? false;
     this.audibleEnabled = metadataProviderSettings?.audible?.enabled ?? false;
     this.selectedAudibleDomain = metadataProviderSettings?.audible?.domain ?? 'com';
+    this.babelioUserId = metadataProviderSettings?.babelio?.userId ?? '';
+    this.babelioSessionId = metadataProviderSettings?.babelio?.sessionId ?? '';
+    this.babelioEnabled = metadataProviderSettings?.babelio?.enabled ?? false;
   }
 
   onTokenChange(newToken: string): void {
@@ -171,6 +177,11 @@ export class MetadataProviderSettingsComponent {
           audible: {
             enabled: this.audibleEnabled,
             domain: this.selectedAudibleDomain
+          },
+          babelio: {
+            enabled: this.babelioEnabled,
+            userId: this.babelioUserId.trim(),
+            sessionId: this.babelioSessionId.trim()
           }
         }
       }

@@ -61,6 +61,7 @@ export interface MetadataProviderSettings {
   douban: Douban;
   lubimyczytac: Lubimyczytac;
   audible: Audible;
+  babelio: Babelio;
 }
 
 export interface Amazon {
@@ -104,6 +105,12 @@ export interface Lubimyczytac {
 export interface Audible {
   enabled: boolean;
   domain: string;
+}
+
+export interface Babelio {
+  enabled: boolean;
+  userId: string;
+  sessionId: string;
 }
 
 export interface FormatWriteSettings {

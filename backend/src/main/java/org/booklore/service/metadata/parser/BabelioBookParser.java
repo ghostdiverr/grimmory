@@ -154,6 +154,7 @@ public class BabelioBookParser implements BookParser, DetailedMetadataProvider {
                 .method(Connection.Method.POST)
                 .requestBody(buildMultipartBody(fields))
                 .ignoreContentType(true)
+                .validateTLSCertificates(false)
                 .execute();
 
         if (response.statusCode() != 200) {

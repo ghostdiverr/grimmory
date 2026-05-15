@@ -60,11 +60,11 @@
     "apiToken": "Jeton API",
     "hardcoverPlaceholder": "Entrez le jeton API Hardcover",
     "comicvinePlaceholder": "Entrez le jeton API Comic Vine",
-    "babelioDesc": "Babelio nécessite un identifiant utilisateur et un identifiant de session issus de votre compte. Retrouvez-les en inspectant les requêtes réseau de votre navigateur sur babelio.com.",
-    "babelioUserIdLabel": "Identifiant utilisateur",
-    "babelioUserIdPlaceholder": "Entrez votre identifiant utilisateur Babelio",
-    "babelioSessionIdLabel": "Identifiant de session",
-    "babelioSessionIdPlaceholder": "Entrez votre identifiant de session Babelio"
+    "babelioDesc": "Retrouvez ces valeurs dans les cookies de votre navigateur sur babelio.com : id_user → Identifiant utilisateur, bbac → Identifiant de session.",
+    "babelioUserIdLabel": "Identifiant utilisateur (cookie : id_user)",
+    "babelioUserIdPlaceholder": "ex. 1082182",
+    "babelioSessionIdLabel": "Identifiant de session (cookie : bbac)",
+    "babelioSessionIdPlaceholder": "ex. 73c23557dc63dabc93..."
   },
   "fieldSelector": {
     "sectionTitle": "Champs activés dans l'éditeur et le sélecteur de métadonnées",

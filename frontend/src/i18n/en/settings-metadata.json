@@ -62,11 +62,11 @@
     "apiToken": "API Token",
     "hardcoverPlaceholder": "Enter Hardcover API token",
     "comicvinePlaceholder": "Enter Comic Vine API token",
-    "babelioDesc": "Babelio requires a user ID and session ID from your account. Find them by inspecting your browser's network requests on babelio.com.",
-    "babelioUserIdLabel": "User ID",
-    "babelioUserIdPlaceholder": "Enter your Babelio user ID",
-    "babelioSessionIdLabel": "Session ID",
-    "babelioSessionIdPlaceholder": "Enter your Babelio session ID"
+    "babelioDesc": "Find these values in your browser cookies on babelio.com: id_user → User ID, bbac → Session ID.",
+    "babelioUserIdLabel": "User ID (cookie: id_user)",
+    "babelioUserIdPlaceholder": "e.g. 1082182",
+    "babelioSessionIdLabel": "Session ID (cookie: bbac)",
+    "babelioSessionIdPlaceholder": "e.g. 73c23557dc63dabc93..."
   },
   "publicReviews": {
     "sectionTitle": "Public Reviews",

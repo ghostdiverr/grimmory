@@ -10,6 +10,7 @@ import org.booklore.model.dto.settings.MetadataProviderSettings;
 import org.booklore.model.enums.MetadataProvider;
 import org.booklore.service.appsettings.AppSettingService;
 import org.booklore.service.metadata.parser.babelio.BabelioBookDetails;
+import org.booklore.service.metadata.parser.babelio.BabelioEditionsResponse;
 import org.booklore.service.metadata.parser.babelio.BabelioLoginResponse;
 import org.booklore.service.metadata.parser.babelio.BabelioSearchResult;
 import org.booklore.util.BookUtils;
@@ -83,7 +84,9 @@ public class BabelioBookParser implements BookParser, DetailedMetadataProvider {
             log.warn("Babelio: no search term available");
             return Collections.emptyList();
         }
-        log.info("Babelio: searching for term={}", term);
+        String searchedIsbn = ParserUtils.cleanIsbn(request.getIsbn());
+        boolean isbnSearch = searchedIsbn != null && !searchedIsbn.isBlank();
+        log.info("Babelio: searching for term={} (isbn={})", term, isbnSearch);
         try {
             String json = post(Map.of("action", "suggesteur_recherche", "term", term, "test_series", "1"));
             BabelioSearchResult result = objectMapper.readValue(json, BabelioSearchResult.class);
@@ -92,10 +95,13 @@ public class BabelioBookParser implements BookParser, DetailedMetadataProvider {
                 return Collections.emptyList();
             }
             return result.getResults().stream()
-                    .filter(r -> "livres".equals(r.getType()))
-                    .map(BabelioSearchResult.Result::getIdOeuvre)
-                    .filter(Objects::nonNull)
-                    .map(this::fetchAndBuildMetadata)
+                    .filter(r -> "livres".equals(r.getType()) && r.getIdOeuvre() != null)
+                    .map(r -> {
+                        String idEdition = isbnSearch
+                                ? resolveEditionId(r.getIdOeuvre(), searchedIsbn)
+                                : null;
+                        return fetchAndBuildMetadata(r.getIdOeuvre(), idEdition);
+                    })
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList());
         } catch (BabelioCredentialsException e) {
@@ -103,6 +109,23 @@ public class BabelioBookParser implements BookParser, DetailedMetadataProvider {
         } catch (Exception e) {
             log.error("Babelio: search failed for term={}", term, e);
             return Collections.emptyList();
+        }
+    }
+
+    private String resolveEditionId(String idOeuvre, String isbn) {
+        try {
+            String json = post(Map.of("action", "f_editions_livre", "id_oeuvre", idOeuvre, "page", "1"));
+            BabelioEditionsResponse resp = objectMapper.readValue(json, BabelioEditionsResponse.class);
+            if (resp.getEditions() == null) return null;
+            return resp.getEditions().stream()
+                    .filter(e -> isbn.equals(ParserUtils.cleanIsbn(e.getEan13()))
+                              || isbn.equals(ParserUtils.cleanIsbn(e.getIsbn())))
+                    .map(BabelioEditionsResponse.Edition::getId)
+                    .findFirst()
+                    .orElse(null);
+        } catch (Exception e) {
+            log.warn("Babelio: could not resolve edition for id_oeuvre={} isbn={}: {}", idOeuvre, isbn, e.getMessage());
+            return null;
         }
     }
 
@@ -137,10 +160,15 @@ public class BabelioBookParser implements BookParser, DetailedMetadataProvider {
     }
 
     private BookMetadata fetchAndBuildMetadata(String babelioId) {
-        log.info("Babelio: fetching details for id_oeuvre={}", babelioId);
+        return fetchAndBuildMetadata(babelioId, null);
+    }
+
+    private BookMetadata fetchAndBuildMetadata(String babelioId, String idEdition) {
+        String editionParam = (idEdition != null && !idEdition.isBlank()) ? idEdition : "undefined";
+        log.info("Babelio: fetching details for id_oeuvre={} id_edition={}", babelioId, editionParam);
         try {
             String json = post(Map.of("action", "book_all", "book_id", babelioId,
-                    "id_edition", "undefined", "no_cache", "1"));
+                    "id_edition", editionParam, "no_cache", "1"));
             BabelioBookDetails details = objectMapper.readValue(json, BabelioBookDetails.class);
             if (details.getBookAll() == null
                     || details.getBookAll().getBookInfoGlobal() == null

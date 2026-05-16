@@ -57,6 +57,7 @@ public class BookMetadata {
     private String audibleId;
     private Double audibleRating;
     private Integer audibleReviewCount;
+    private String babelioId;
     private String externalUrl;
     private Instant coverUpdatedOn;
     private Instant audiobookCoverUpdatedOn;

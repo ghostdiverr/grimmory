@@ -190,6 +190,7 @@ export interface BookMetadata {
   audibleId?: string;
   audibleRating?: number | null;
   audibleReviewCount?: number | null;
+  babelioId?: string;
   narrator?: string;
   abridged?: boolean | null;
   narratorLocked?: boolean;

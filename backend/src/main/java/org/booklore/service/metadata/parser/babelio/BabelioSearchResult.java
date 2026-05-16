@@ -18,5 +18,10 @@ public class BabelioSearchResult {
         private String titre;
         private String type;
         private String url;
+        private String couverture;
+        private String nom;
+        private String prenoms;
+        @JsonProperty("ca_note")
+        private String caNote;
     }
 }

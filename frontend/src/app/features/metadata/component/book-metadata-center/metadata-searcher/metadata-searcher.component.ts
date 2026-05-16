@@ -431,6 +431,9 @@ export class MetadataSearcherComponent implements OnDestroy, OnChanges {
     if (metadata.asin && !metadata.description) {
       return {provider: 'Amazon', id: metadata.asin};
     }
+    if (metadata.babelioId && !metadata.description) {
+      return {provider: 'Babelio', id: metadata.babelioId};
+    }
     return null;
   }
 
@@ -440,6 +443,7 @@ export class MetadataSearcherComponent implements OnDestroy, OnChanges {
       case 'GoodReads': return metadata.goodreadsId;
       case 'Amazon': return metadata.asin;
       case 'Audible': return metadata.audibleId;
+      case 'Babelio': return metadata.babelioId;
       default: return undefined;
     }
   }

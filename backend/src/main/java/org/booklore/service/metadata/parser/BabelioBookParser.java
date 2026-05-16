@@ -78,10 +78,44 @@ public class BabelioBookParser implements BookParser, DetailedMetadataProvider {
 
     @Override
     public List<BookMetadata> fetchMetadata(Book book, FetchMetadataRequest request) {
-        String babelioId = searchBabelioId(book, request);
-        if (babelioId == null) return Collections.emptyList();
-        BookMetadata metadata = fetchAndBuildMetadata(babelioId);
-        return metadata != null ? List.of(metadata) : Collections.emptyList();
+        String term = buildSearchTerm(book, request);
+        if (term == null || term.isBlank()) {
+            log.warn("Babelio: no search term available");
+            return Collections.emptyList();
+        }
+        log.info("Babelio: searching for term={}", term);
+        try {
+            String json = post(Map.of("action", "suggesteur_recherche", "term", term, "test_series", "1"));
+            BabelioSearchResult result = objectMapper.readValue(json, BabelioSearchResult.class);
+            if (result.getResults() == null || result.getResults().isEmpty()) {
+                log.info("Babelio: no results for term={}", term);
+                return Collections.emptyList();
+            }
+            return result.getResults().stream()
+                    .filter(r -> "livres".equals(r.getType()))
+                    .map(this::mapSearchResultToMetadata)
+                    .collect(Collectors.toList());
+        } catch (BabelioCredentialsException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("Babelio: search failed for term={}", term, e);
+            return Collections.emptyList();
+        }
+    }
+
+    private BookMetadata mapSearchResultToMetadata(BabelioSearchResult.Result r) {
+        String firstName = r.getPrenoms() != null ? r.getPrenoms().trim() : "";
+        String lastName = r.getNom() != null ? r.getNom().trim() : "";
+        String author = (firstName + " " + lastName).trim();
+
+        return BookMetadata.builder()
+                .provider(MetadataProvider.Babelio)
+                .babelioId(r.getIdOeuvre())
+                .title(r.getTitre())
+                .authors(author.isBlank() ? Collections.emptyList() : List.of(author))
+                .thumbnailUrl(buildCoverUrl(r.getCouverture()))
+                .rating(parseDouble(r.getCaNote()))
+                .build();
     }
 
     @Override
@@ -126,7 +160,7 @@ public class BabelioBookParser implements BookParser, DetailedMetadataProvider {
                 log.warn("Babelio: empty book_all payload for id={}", babelioId);
                 return null;
             }
-            return mapToBookMetadata(details);
+            return mapToBookMetadata(babelioId, details);
         } catch (BabelioCredentialsException e) {
             throw e;
         } catch (Exception e) {
@@ -135,7 +169,7 @@ public class BabelioBookParser implements BookParser, DetailedMetadataProvider {
         }
     }
 
-    private BookMetadata mapToBookMetadata(BabelioBookDetails details) {
+    private BookMetadata mapToBookMetadata(String babelioId, BabelioBookDetails details) {
         BabelioBookDetails.BookInfo info = details.getBookAll().getBookInfoGlobal().getBookInfo();
 
         List<String> authors = Optional.ofNullable(info.getAuthorList())
@@ -160,6 +194,7 @@ public class BabelioBookParser implements BookParser, DetailedMetadataProvider {
 
         return BookMetadata.builder()
                 .provider(MetadataProvider.Babelio)
+                .babelioId(babelioId)
                 .title(info.getBookTitle())
                 .authors(authors)
                 .categories(categories)

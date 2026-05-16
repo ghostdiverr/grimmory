@@ -109,8 +109,8 @@ export interface Audible {
 
 export interface Babelio {
   enabled: boolean;
-  userId: string;
-  sessionId: string;
+  userLogin: string;
+  password: string;
 }
 
 export interface FormatWriteSettings {

@@ -1,6 +1,6 @@
 package org.booklore.service.metadata.parser;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.booklore.exception.BabelioCredentialsException;
 import org.booklore.model.dto.Book;
@@ -10,11 +10,15 @@ import org.booklore.model.dto.settings.MetadataProviderSettings;
 import org.booklore.model.enums.MetadataProvider;
 import org.booklore.service.appsettings.AppSettingService;
 import org.booklore.service.metadata.parser.babelio.BabelioBookDetails;
+import org.booklore.service.metadata.parser.babelio.BabelioLoginResponse;
 import org.booklore.service.metadata.parser.babelio.BabelioSearchResult;
 import org.booklore.util.BookUtils;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
@@ -23,6 +27,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.time.LocalDate;
@@ -31,7 +36,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class BabelioBookParser implements BookParser, DetailedMetadataProvider {
 
     private static final String API_URL = "https://www.babelio.com/api/appel.php";
@@ -61,6 +66,9 @@ public class BabelioBookParser implements BookParser, DetailedMetadataProvider {
     private final AppSettingService appSettingService;
     private final ObjectMapper objectMapper;
 
+    private volatile String cachedToken;
+    private volatile String cachedUserId;
+
     @Override
     public BookMetadata fetchTopMetadata(Book book, FetchMetadataRequest request) {
         String babelioId = searchBabelioId(book, request);
@@ -89,10 +97,8 @@ public class BabelioBookParser implements BookParser, DetailedMetadataProvider {
         }
         log.info("Babelio: searching for term={}", term);
         try {
-            MetadataProviderSettings.Babelio settings = getSettings();
-            String json = post(settings, Map.of("action", "suggesteur_recherche", "term", term));
+            String json = post(Map.of("action", "suggesteur_recherche", "term", term));
             BabelioSearchResult result = objectMapper.readValue(json, BabelioSearchResult.class);
-            checkCredentials(result.getSuccess(), result.getReason());
             if (result.getResults() == null || result.getResults().isEmpty()) {
                 log.info("Babelio: no results for term={}", term);
                 return null;
@@ -111,10 +117,8 @@ public class BabelioBookParser implements BookParser, DetailedMetadataProvider {
     private BookMetadata fetchAndBuildMetadata(String babelioId) {
         log.info("Babelio: fetching details for id_oeuvre={}", babelioId);
         try {
-            MetadataProviderSettings.Babelio settings = getSettings();
-            String json = post(settings, Map.of("action", "book_all", "book_id", babelioId));
+            String json = post(Map.of("action", "book_all", "book_id", babelioId));
             BabelioBookDetails details = objectMapper.readValue(json, BabelioBookDetails.class);
-            checkCredentials(details.getSuccess(), details.getReason());
             if (details.getBookAll() == null
                     || details.getBookAll().getBookInfoGlobal() == null
                     || details.getBookAll().getBookInfoGlobal().getBookInfo() == null) {
@@ -166,21 +170,98 @@ public class BabelioBookParser implements BookParser, DetailedMetadataProvider {
                 .build();
     }
 
-    private String post(MetadataProviderSettings.Babelio settings, Map<String, String> extraFields)
-            throws IOException, InterruptedException {
+    // ── Authentication ───────────────────────────────────────────────────────
+
+    private void ensureAuthenticated() throws IOException, InterruptedException {
+        if (cachedToken != null && cachedUserId != null) return;
+        synchronized (this) {
+            if (cachedToken != null && cachedUserId != null) return;
+            login();
+        }
+    }
+
+    private synchronized void login() throws IOException, InterruptedException {
+        MetadataProviderSettings.Babelio settings = getSettings();
         Map<String, String> fields = new LinkedHashMap<>();
-        fields.put("user_id", settings.getUserId());
-        fields.put("session_id", settings.getSessionId());
-        fields.put("timestamp", String.valueOf(System.currentTimeMillis()));
+        fields.put("action", "connect_reader");
+        fields.put("user_login", settings.getUserLogin());
+        fields.put("password", settings.getPassword());
+        fields.put("os", "2");
+        String json = sendRequest(fields);
+        BabelioLoginResponse resp = objectMapper.readValue(json, BabelioLoginResponse.class);
+        if (resp.getSuccess() == 0) {
+            throw new BabelioCredentialsException("Connexion Babelio échouée : " + resp.getReason());
+        }
+        cachedToken = resp.getToken();
+        cachedUserId = resp.getUserId();
+        log.info("Babelio: login successful, user_id={}", cachedUserId);
+    }
+
+    private String computeSessionId(String userId, long timestamp, String action, String token) {
+        try {
+            String message = userId + timestamp + action;
+            Mac mac = Mac.getInstance("HmacSHA256");
+            mac.init(new SecretKeySpec(token.getBytes(StandardCharsets.UTF_8), "HmacSHA256"));
+            byte[] digest = mac.doFinal(message.getBytes(StandardCharsets.UTF_8));
+            return Base64.getEncoder().encodeToString(digest);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to compute Babelio session signature", e);
+        }
+    }
+
+    private boolean isAuthFailure(String json) {
+        try {
+            JsonNode node = objectMapper.readTree(json);
+            int code = node.path("code").asInt(0);
+            int success = node.path("success").asInt(1);
+            String reason = node.path("reason").asText("");
+            return code == 4 || (success == 0 && reason.contains("authentification failure"));
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    // ── HTTP ─────────────────────────────────────────────────────────────────
+
+    private String post(Map<String, String> extraFields)
+            throws IOException, InterruptedException {
+        ensureAuthenticated();
+        return postWithAuth(extraFields, true);
+    }
+
+    private String postWithAuth(Map<String, String> extraFields, boolean retry)
+            throws IOException, InterruptedException {
+        String action = extraFields.get("action");
+        long timestamp = System.currentTimeMillis();
+        String sessionId = computeSessionId(cachedUserId, timestamp, action, cachedToken);
+
+        Map<String, String> fields = new LinkedHashMap<>();
+        fields.put("user_id", cachedUserId);
+        fields.put("session_id", sessionId);
+        fields.put("timestamp", String.valueOf(timestamp));
         fields.putAll(extraFields);
 
+        String json = sendRequest(fields);
+
+        if (retry && isAuthFailure(json)) {
+            log.warn("Babelio: auth failure (code 4), re-authenticating");
+            synchronized (this) {
+                cachedToken = null;
+                cachedUserId = null;
+                login();
+            }
+            return postWithAuth(extraFields, false);
+        }
+        return json;
+    }
+
+    private String sendRequest(Map<String, String> fields) throws IOException, InterruptedException {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(API_URL))
                 .header("User-Agent", USER_AGENT)
                 .header("Content-Type", "multipart/form-data; boundary=" + BOUNDARY)
                 .POST(HttpRequest.BodyPublishers.ofString(buildMultipartBody(fields)))
                 .build();
-
         HttpResponse<String> response = HTTP_CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() != 200) {
             throw new IOException("Babelio API returned HTTP " + response.statusCode());
@@ -200,24 +281,21 @@ public class BabelioBookParser implements BookParser, DetailedMetadataProvider {
         return sb.toString();
     }
 
+    // ── Settings ─────────────────────────────────────────────────────────────
+
     private MetadataProviderSettings.Babelio getSettings() {
         MetadataProviderSettings.Babelio settings = appSettingService.getAppSettings()
                 .getMetadataProviderSettings().getBabelio();
         if (settings == null
-                || settings.getUserId() == null || settings.getUserId().isBlank()
-                || settings.getSessionId() == null || settings.getSessionId().isBlank()) {
+                || settings.getUserLogin() == null || settings.getUserLogin().isBlank()
+                || settings.getPassword() == null || settings.getPassword().isBlank()) {
             throw new BabelioCredentialsException(
-                    "Session Babelio expirée, veuillez mettre à jour vos paramètres");
+                    "Identifiants Babelio manquants, veuillez configurer vos paramètres");
         }
         return settings;
     }
 
-    private void checkCredentials(int success, String reason) {
-        if (success == 0 && reason != null && reason.contains("session_id")) {
-            throw new BabelioCredentialsException(
-                    "Session Babelio expirée, veuillez mettre à jour vos paramètres");
-        }
-    }
+    // ── Parsing helpers ──────────────────────────────────────────────────────
 
     private String buildSearchTerm(Book book, FetchMetadataRequest request) {
         String isbn = ParserUtils.cleanIsbn(request.getIsbn());

@@ -72,7 +72,7 @@ public class MetadataProviderSettings {
     @Data
     public static class Babelio {
         private boolean enabled;
-        private String userId;
-        private String sessionId;
+        private String userLogin;
+        private String password;
     }
 }

@@ -111,8 +111,8 @@ public class SettingPersistenceHelper {
 
         MetadataProviderSettings.Babelio defaultBabelio = new MetadataProviderSettings.Babelio();
         defaultBabelio.setEnabled(false);
-        defaultBabelio.setUserId(null);
-        defaultBabelio.setSessionId(null);
+        defaultBabelio.setUserLogin(null);
+        defaultBabelio.setPassword(null);
 
         defaultMetadataProviderSettings.setAmazon(defaultAmazon);
         defaultMetadataProviderSettings.setGoogle(defaultGoogle);

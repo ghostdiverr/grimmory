@@ -134,22 +134,22 @@
               @if (babelioEnabled) {
                 <div class="setting-options">
                   <div class="config-field">
-                    <span class="config-label">{{ t('babelioUserIdLabel') }}</span>
+                    <span class="config-label">{{ t('babelioUserLoginLabel') }}</span>
                     <p class="config-description">{{ t('babelioDesc') }}</p>
                     <input
                       type="text"
                       pInputText
-                      [placeholder]="t('babelioUserIdPlaceholder')"
-                      [(ngModel)]="babelioUserId"
+                      [placeholder]="t('babelioUserLoginPlaceholder')"
+                      [(ngModel)]="babelioUserLogin"
                       class="config-input"/>
                   </div>
                   <div class="config-field">
-                    <span class="config-label">{{ t('babelioSessionIdLabel') }}</span>
+                    <span class="config-label">{{ t('babelioPasswordLabel') }}</span>
                     <input
-                      type="text"
+                      type="password"
                       pInputText
-                      [placeholder]="t('babelioSessionIdPlaceholder')"
-                      [(ngModel)]="babelioSessionId"
+                      [placeholder]="t('babelioPasswordPlaceholder')"
+                      [(ngModel)]="babelioPassword"
                       class="config-input"/>
                   </div>
                 </div>

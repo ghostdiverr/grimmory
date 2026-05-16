@@ -74,7 +74,10 @@ public class BabelioBookParser implements BookParser, DetailedMetadataProvider {
     public BookMetadata fetchTopMetadata(Book book, FetchMetadataRequest request) {
         String babelioId = searchBabelioId(book, request);
         if (babelioId == null) return null;
-        return fetchAndBuildMetadata(babelioId);
+        String searchedIsbn = ParserUtils.cleanIsbn(request.getIsbn());
+        boolean isbnSearch = searchedIsbn != null && !searchedIsbn.isBlank();
+        String idEdition = isbnSearch ? resolveEditionId(babelioId, searchedIsbn) : null;
+        return fetchAndBuildMetadata(babelioId, idEdition);
     }
 
     @Override

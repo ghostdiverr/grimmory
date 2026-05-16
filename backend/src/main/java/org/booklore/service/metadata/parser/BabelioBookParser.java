@@ -117,7 +117,8 @@ public class BabelioBookParser implements BookParser, DetailedMetadataProvider {
     private BookMetadata fetchAndBuildMetadata(String babelioId) {
         log.info("Babelio: fetching details for id_oeuvre={}", babelioId);
         try {
-            String json = post(Map.of("action", "book_all", "book_id", babelioId));
+            String json = post(Map.of("action", "book_all", "book_id", babelioId,
+                    "id_edition", "undefined", "no_cache", "1"));
             BabelioBookDetails details = objectMapper.readValue(json, BabelioBookDetails.class);
             if (details.getBookAll() == null
                     || details.getBookAll().getBookInfoGlobal() == null

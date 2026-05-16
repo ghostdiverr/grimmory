@@ -486,6 +486,8 @@ export class MetadataSearcherComponent implements OnDestroy, OnChanges {
       return `<a href="https://comicvine.gamespot.com/4050-${metadata.comicvineId}/" target="_blank">Comicvine</a>`;
     } else if (metadata.ranobedbId) {
       return `<a href="https://ranobedb.org/book/${metadata.ranobedbId}" target="_blank">RanobeDB</a>`;
+    } else if (metadata.babelioId) {
+      return `<a href="https://www.babelio.com/livres/-/${metadata.babelioId}" target="_blank">Babelio</a>`;
     } else if (metadata.externalUrl) {
       const providerName = metadata.provider || 'Link';
       return `<a href="${metadata.externalUrl}" target="_blank">${providerName}</a>`;
@@ -495,7 +497,8 @@ export class MetadataSearcherComponent implements OnDestroy, OnChanges {
 
   trackByMetadata(index: number, metadata: BookMetadata): string {
     return metadata.googleId || metadata.goodreadsId || metadata.asin ||
-      metadata.hardcoverId || metadata.comicvineId || metadata.audibleId || index.toString();
+      metadata.hardcoverId || metadata.comicvineId || metadata.audibleId ||
+      metadata.babelioId || index.toString();
   }
 
   onProviderClick(event: Event) {

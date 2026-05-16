@@ -332,6 +332,7 @@ export class MetadataSearcherComponent implements OnDestroy, OnChanges {
     if (metadata['lubimyczytacId']) return 'lubimyczytac';
     if (metadata.comicvineId) return 'comicvine';
     if (metadata.ranobedbId) return 'ranobedb';
+    if (metadata.babelioId) return 'babelio';
     return metadata.provider?.toLowerCase() || null;
   }
 

@@ -152,6 +152,11 @@ public class BabelioBookParser implements BookParser, DetailedMetadataProvider {
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
 
+        BabelioBookDetails.Serie serie = Optional.ofNullable(details.getBookAll().getSerie())
+                .filter(l -> !l.isEmpty())
+                .map(l -> l.getFirst())
+                .orElse(null);
+
         return BookMetadata.builder()
                 .provider(MetadataProvider.Babelio)
                 .title(info.getBookTitle())
@@ -164,10 +169,15 @@ public class BabelioBookParser implements BookParser, DetailedMetadataProvider {
                 .publishedDate(parseDate(info.getPublishingDate()))
                 .pageCount(parseInteger(info.getNbPages()))
                 .rating(parseDouble(info.getAverageRating()))
-                .thumbnailUrl(info.getCoverUrl())
-                .seriesName(info.getSerieName())
-                .seriesNumber(parseFloat(info.getTome()))
+                .thumbnailUrl(buildCoverUrl(info.getCoverUrl()))
+                .seriesName(serie != null ? serie.getNom() : null)
+                .seriesNumber(serie != null ? parseFloat(serie.getTome()) : null)
                 .build();
+    }
+
+    private String buildCoverUrl(String raw) {
+        if (raw == null || raw.isBlank()) return null;
+        return raw.startsWith("http") ? raw : "https://www.babelio.com" + raw;
     }
 
     // ── Authentication ───────────────────────────────────────────────────────

@@ -18,6 +18,7 @@ public class BabelioBookDetails {
         private BookInfoGlobal bookInfoGlobal;
         @JsonProperty("tags_on_book")
         private TagsOnBook tagsOnBook;
+        private List<Serie> serie;
     }
 
     @Data
@@ -44,10 +45,14 @@ public class BabelioBookDetails {
         private String nbPages;
         @JsonProperty("average_rating")
         private String averageRating;
-        @JsonProperty("cover_url")
+        @JsonProperty("bookcoverbig_url")
         private String coverUrl;
-        @JsonProperty("serie_name")
-        private String serieName;
+    }
+
+    @Data
+    public static class Serie {
+        private String id;
+        private String nom;
         private String tome;
     }
 

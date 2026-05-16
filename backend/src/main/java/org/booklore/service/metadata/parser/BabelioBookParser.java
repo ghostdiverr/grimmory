@@ -10,6 +10,7 @@ import org.booklore.model.dto.settings.MetadataProviderSettings;
 import org.booklore.model.enums.MetadataProvider;
 import org.booklore.service.appsettings.AppSettingService;
 import org.booklore.service.metadata.parser.babelio.BabelioBookDetails;
+import org.booklore.service.metadata.parser.babelio.BabelioEditionsResponse;
 import org.booklore.service.metadata.parser.babelio.BabelioLoginResponse;
 import org.booklore.service.metadata.parser.babelio.BabelioSearchBookResponse;
 import org.booklore.service.metadata.parser.babelio.BabelioSearchResult;
@@ -198,7 +199,18 @@ public class BabelioBookParser implements BookParser, DetailedMetadataProvider {
             }
             String title = details.getBookAll().getBookInfoGlobal().getBookInfo().getBookTitle();
             log.info("Babelio: book_all OK — book_id={} id_edition={} title=\"{}\"", babelioId, editionParam, title);
-            return mapToBookMetadata(babelioId, details);
+
+            BabelioEditionsResponse.Edition editionOverride = null;
+            if (idEdition != null && !idEdition.isBlank()) {
+                editionOverride = fetchEditionOverride(babelioId, idEdition);
+                if (editionOverride != null) {
+                    log.info("Babelio: edition override applied — id_edition={}", idEdition);
+                } else {
+                    log.warn("Babelio: edition id={} not found in f_editions_livre for book_id={}", idEdition, babelioId);
+                }
+            }
+
+            return mapToBookMetadata(babelioId, details, editionOverride);
         } catch (BabelioCredentialsException e) {
             throw e;
         } catch (Exception e) {
@@ -207,7 +219,25 @@ public class BabelioBookParser implements BookParser, DetailedMetadataProvider {
         }
     }
 
-    private BookMetadata mapToBookMetadata(String babelioId, BabelioBookDetails details) {
+    private BabelioEditionsResponse.Edition fetchEditionOverride(String bookId, String idEdition) {
+        log.info("Babelio: fetching edition data — action=f_editions_livre id_oeuvre={} target_id_edition={}", bookId, idEdition);
+        try {
+            String json = post(Map.of("action", "f_editions_livre", "id_oeuvre", bookId, "page", "1"));
+            BabelioEditionsResponse resp = objectMapper.readValue(json, BabelioEditionsResponse.class);
+            if (resp.getEditions() == null) return null;
+            return resp.getEditions().stream()
+                    .filter(e -> idEdition.equals(e.getId()))
+                    .findFirst()
+                    .orElse(null);
+        } catch (BabelioCredentialsException e) {
+            throw e;
+        } catch (Exception e) {
+            log.warn("Babelio: f_editions_livre failed for id_oeuvre={}: {}", bookId, e.getMessage());
+            return null;
+        }
+    }
+
+    private BookMetadata mapToBookMetadata(String babelioId, BabelioBookDetails details, BabelioEditionsResponse.Edition edition) {
         BabelioBookDetails.BookInfo info = details.getBookAll().getBookInfoGlobal().getBookInfo();
 
         List<String> authors = Optional.ofNullable(info.getAuthorList())
@@ -230,6 +260,25 @@ public class BabelioBookParser implements BookParser, DetailedMetadataProvider {
                 .map(l -> l.getFirst())
                 .orElse(null);
 
+        String isbn10 = edition != null && edition.getIsbn() != null
+                ? ParserUtils.cleanIsbn(edition.getIsbn())
+                : ParserUtils.cleanIsbn(info.getIsbn10());
+        String isbn13 = edition != null && edition.getEan13() != null
+                ? ParserUtils.cleanIsbn(edition.getEan13())
+                : ParserUtils.cleanIsbn(info.getEan13());
+        String publisher = edition != null && edition.getNom() != null
+                ? edition.getNom()
+                : info.getPublisherName();
+        LocalDate publishedDate = edition != null && edition.getDtPublication() != null
+                ? parseDate(edition.getDtPublication())
+                : parseDate(info.getPublishingDate());
+        Integer pageCount = edition != null && edition.getNbPages() != null
+                ? parseInteger(edition.getNbPages())
+                : parseInteger(info.getNbPages());
+        String thumbnailUrl = edition != null && edition.getCouverture() != null
+                ? buildCoverUrl(edition.getCouverture())
+                : buildCoverUrl(info.getCoverUrl());
+
         return BookMetadata.builder()
                 .provider(MetadataProvider.Babelio)
                 .babelioId(babelioId)
@@ -237,13 +286,13 @@ public class BabelioBookParser implements BookParser, DetailedMetadataProvider {
                 .authors(authors)
                 .categories(categories)
                 .description(info.getSummary())
-                .isbn10(ParserUtils.cleanIsbn(info.getIsbn10()))
-                .isbn13(ParserUtils.cleanIsbn(info.getEan13()))
-                .publisher(info.getPublisherName())
-                .publishedDate(parseDate(info.getPublishingDate()))
-                .pageCount(parseInteger(info.getNbPages()))
+                .isbn10(isbn10)
+                .isbn13(isbn13)
+                .publisher(publisher)
+                .publishedDate(publishedDate)
+                .pageCount(pageCount)
                 .rating(parseDouble(info.getAverageRating()))
-                .thumbnailUrl(buildCoverUrl(info.getCoverUrl()))
+                .thumbnailUrl(thumbnailUrl)
                 .seriesName(serie != null ? serie.getNom() : null)
                 .seriesNumber(serie != null ? parseFloat(serie.getTome()) : null)
                 .build();

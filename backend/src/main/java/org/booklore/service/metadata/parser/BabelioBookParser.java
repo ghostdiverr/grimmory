@@ -93,7 +93,10 @@ public class BabelioBookParser implements BookParser, DetailedMetadataProvider {
             }
             return result.getResults().stream()
                     .filter(r -> "livres".equals(r.getType()))
-                    .map(this::mapSearchResultToMetadata)
+                    .map(BabelioSearchResult.Result::getIdOeuvre)
+                    .filter(Objects::nonNull)
+                    .map(this::fetchAndBuildMetadata)
+                    .filter(Objects::nonNull)
                     .collect(Collectors.toList());
         } catch (BabelioCredentialsException e) {
             throw e;
@@ -101,21 +104,6 @@ public class BabelioBookParser implements BookParser, DetailedMetadataProvider {
             log.error("Babelio: search failed for term={}", term, e);
             return Collections.emptyList();
         }
-    }
-
-    private BookMetadata mapSearchResultToMetadata(BabelioSearchResult.Result r) {
-        String firstName = r.getPrenoms() != null ? r.getPrenoms().trim() : "";
-        String lastName = r.getNom() != null ? r.getNom().trim() : "";
-        String author = (firstName + " " + lastName).trim();
-
-        return BookMetadata.builder()
-                .provider(MetadataProvider.Babelio)
-                .babelioId(r.getIdOeuvre())
-                .title(r.getTitre())
-                .authors(author.isBlank() ? Collections.emptyList() : List.of(author))
-                .thumbnailUrl(buildCoverUrl(r.getCouverture()))
-                .rating(parseDouble(r.getCaNote()))
-                .build();
     }
 
     @Override

@@ -10,8 +10,8 @@ import org.booklore.model.dto.settings.MetadataProviderSettings;
 import org.booklore.model.enums.MetadataProvider;
 import org.booklore.service.appsettings.AppSettingService;
 import org.booklore.service.metadata.parser.babelio.BabelioBookDetails;
-import org.booklore.service.metadata.parser.babelio.BabelioEditionsResponse;
 import org.booklore.service.metadata.parser.babelio.BabelioLoginResponse;
+import org.booklore.service.metadata.parser.babelio.BabelioSearchBookResponse;
 import org.booklore.service.metadata.parser.babelio.BabelioSearchResult;
 import org.booklore.util.BookUtils;
 import org.springframework.stereotype.Service;
@@ -72,24 +72,54 @@ public class BabelioBookParser implements BookParser, DetailedMetadataProvider {
 
     @Override
     public BookMetadata fetchTopMetadata(Book book, FetchMetadataRequest request) {
+        String isbn = ParserUtils.cleanIsbn(request.getIsbn());
+        if (isbn != null && !isbn.isBlank()) {
+            List<BookMetadata> results = fetchByIsbn(isbn);
+            return results.isEmpty() ? null : results.getFirst();
+        }
         String babelioId = searchBabelioId(book, request);
         if (babelioId == null) return null;
-        String searchedIsbn = ParserUtils.cleanIsbn(request.getIsbn());
-        boolean isbnSearch = searchedIsbn != null && !searchedIsbn.isBlank();
-        String idEdition = isbnSearch ? resolveEditionId(babelioId, searchedIsbn) : null;
-        return fetchAndBuildMetadata(babelioId, idEdition);
+        return fetchAndBuildMetadata(babelioId, null);
     }
 
     @Override
     public List<BookMetadata> fetchMetadata(Book book, FetchMetadataRequest request) {
+        String isbn = ParserUtils.cleanIsbn(request.getIsbn());
+        if (isbn != null && !isbn.isBlank()) {
+            return fetchByIsbn(isbn);
+        }
+        return fetchByTerm(book, request);
+    }
+
+    private List<BookMetadata> fetchByIsbn(String isbn) {
+        log.info("Babelio: searching by isbn={}", isbn);
+        try {
+            String json = post(Map.of("action", "search_book", "request", isbn, "page", "1"));
+            BabelioSearchBookResponse resp = objectMapper.readValue(json, BabelioSearchBookResponse.class);
+            if (resp.getBooks() == null || resp.getBooks().isEmpty()) {
+                log.info("Babelio: no results for isbn={}", isbn);
+                return Collections.emptyList();
+            }
+            return resp.getBooks().stream()
+                    .filter(b -> b.getBookId() != null)
+                    .map(b -> fetchAndBuildMetadata(b.getBookId(), b.getIdEdition()))
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+        } catch (BabelioCredentialsException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("Babelio: ISBN search failed for isbn={}", isbn, e);
+            return Collections.emptyList();
+        }
+    }
+
+    private List<BookMetadata> fetchByTerm(Book book, FetchMetadataRequest request) {
         String term = buildSearchTerm(book, request);
         if (term == null || term.isBlank()) {
             log.warn("Babelio: no search term available");
             return Collections.emptyList();
         }
-        String searchedIsbn = ParserUtils.cleanIsbn(request.getIsbn());
-        boolean isbnSearch = searchedIsbn != null && !searchedIsbn.isBlank();
-        log.info("Babelio: searching for term={} (isbn={})", term, isbnSearch);
+        log.info("Babelio: searching for term={}", term);
         try {
             String json = post(Map.of("action", "suggesteur_recherche", "term", term, "test_series", "1"));
             BabelioSearchResult result = objectMapper.readValue(json, BabelioSearchResult.class);
@@ -99,12 +129,7 @@ public class BabelioBookParser implements BookParser, DetailedMetadataProvider {
             }
             return result.getResults().stream()
                     .filter(r -> "livres".equals(r.getType()) && r.getIdOeuvre() != null)
-                    .map(r -> {
-                        String idEdition = isbnSearch
-                                ? resolveEditionId(r.getIdOeuvre(), searchedIsbn)
-                                : null;
-                        return fetchAndBuildMetadata(r.getIdOeuvre(), idEdition);
-                    })
+                    .map(r -> fetchAndBuildMetadata(r.getIdOeuvre(), null))
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList());
         } catch (BabelioCredentialsException e) {
@@ -115,26 +140,9 @@ public class BabelioBookParser implements BookParser, DetailedMetadataProvider {
         }
     }
 
-    private String resolveEditionId(String idOeuvre, String isbn) {
-        try {
-            String json = post(Map.of("action", "f_editions_livre", "id_oeuvre", idOeuvre, "page", "1"));
-            BabelioEditionsResponse resp = objectMapper.readValue(json, BabelioEditionsResponse.class);
-            if (resp.getEditions() == null) return null;
-            return resp.getEditions().stream()
-                    .filter(e -> isbn.equals(ParserUtils.cleanIsbn(e.getEan13()))
-                              || isbn.equals(ParserUtils.cleanIsbn(e.getIsbn())))
-                    .map(BabelioEditionsResponse.Edition::getId)
-                    .findFirst()
-                    .orElse(null);
-        } catch (Exception e) {
-            log.warn("Babelio: could not resolve edition for id_oeuvre={} isbn={}: {}", idOeuvre, isbn, e.getMessage());
-            return null;
-        }
-    }
-
     @Override
     public BookMetadata fetchDetailedMetadata(String babelioId) {
-        return fetchAndBuildMetadata(babelioId);
+        return fetchAndBuildMetadata(babelioId, null);
     }
 
     private String searchBabelioId(Book book, FetchMetadataRequest request) {

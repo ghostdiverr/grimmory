@@ -12,12 +12,19 @@ import org.booklore.service.appsettings.AppSettingService;
 import org.booklore.service.metadata.parser.babelio.BabelioBookDetails;
 import org.booklore.service.metadata.parser.babelio.BabelioSearchResult;
 import org.booklore.util.BookUtils;
-import org.jsoup.Connection;
-import org.jsoup.Jsoup;
 import org.springframework.stereotype.Service;
 import tools.jackson.databind.ObjectMapper;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.security.SecureRandom;
+import java.security.cert.X509Certificate;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -31,6 +38,25 @@ public class BabelioBookParser implements BookParser, DetailedMetadataProvider {
     private static final String USER_AGENT = "2.0.138.2";
     private static final String BOUNDARY = "GrimmoryBoundary";
     private static final String CRLF = "\r\n";
+
+    private static final HttpClient HTTP_CLIENT = buildTrustAllHttpClient();
+
+    private static HttpClient buildTrustAllHttpClient() {
+        try {
+            SSLContext sslContext = SSLContext.getInstance("TLS");
+            sslContext.init(null, new TrustManager[]{new X509TrustManager() {
+                public X509Certificate[] getAcceptedIssuers() { return new X509Certificate[0]; }
+                public void checkClientTrusted(X509Certificate[] c, String a) {}
+                public void checkServerTrusted(X509Certificate[] c, String a) {}
+            }}, new SecureRandom());
+            return HttpClient.newBuilder()
+                    .sslContext(sslContext)
+                    .followRedirects(HttpClient.Redirect.NORMAL)
+                    .build();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to initialize Babelio HTTP client", e);
+        }
+    }
 
     private final AppSettingService appSettingService;
     private final ObjectMapper objectMapper;
@@ -141,22 +167,21 @@ public class BabelioBookParser implements BookParser, DetailedMetadataProvider {
     }
 
     private String post(MetadataProviderSettings.Babelio settings, Map<String, String> extraFields)
-            throws IOException {
+            throws IOException, InterruptedException {
         Map<String, String> fields = new LinkedHashMap<>();
         fields.put("user_id", settings.getUserId());
         fields.put("session_id", settings.getSessionId());
         fields.put("timestamp", String.valueOf(System.currentTimeMillis()));
         fields.putAll(extraFields);
 
-        Connection.Response response = Jsoup.connect(API_URL)
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(API_URL))
                 .header("User-Agent", USER_AGENT)
                 .header("Content-Type", "multipart/form-data; boundary=" + BOUNDARY)
-                .method(Connection.Method.POST)
-                .requestBody(buildMultipartBody(fields))
-                .ignoreContentType(true)
-                .validateTLSCertificates(false)
-                .execute();
+                .POST(HttpRequest.BodyPublishers.ofString(buildMultipartBody(fields)))
+                .build();
 
+        HttpResponse<String> response = HTTP_CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() != 200) {
             throw new IOException("Babelio API returned HTTP " + response.statusCode());
         }

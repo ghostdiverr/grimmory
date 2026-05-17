@@ -87,9 +87,9 @@
                   [pTooltip]="t('coverUrlTooltip')"
                   tooltipPosition="top"
                   [outlined]="true"
-                  severity="secondary"
+                  severity="info"
                   size="small"
-                  [disabled]="book.metadata!['coverLocked']">
+                  [disabled]="book.metadata!['coverLocked'] || isCoverUrlUploading">
                 </p-button>
                 @if (!book.metadata!['coverLocked']) {
                   <p-button [pTooltip]="t('lockCoverTooltip')" tooltipPosition="top" size="small" icon="pi pi-lock-open" [outlined]="true" (onClick)="toggleLock('thumbnailUrl')" severity="success"></p-button>
@@ -105,7 +105,8 @@
                     [(ngModel)]="coverUrlInput"
                     [ngModelOptions]="{standalone: true}"
                     [placeholder]="t('coverUrlPlaceholder')"
-                    (keyup.enter)="submitCoverUrl()"/>
+                    (keyup.enter)="submitCoverUrl()"
+                    (keyup.escape)="toggleCoverUrlInput()"/>
                   <p-button
                     icon="pi pi-check"
                     size="small"
@@ -192,9 +193,9 @@
                   [pTooltip]="t('audiobookCoverUrlTooltip')"
                   tooltipPosition="top"
                   [outlined]="true"
-                  severity="secondary"
+                  severity="info"
                   size="small"
-                  [disabled]="book.metadata!['audiobookCoverLocked']">
+                  [disabled]="book.metadata!['audiobookCoverLocked'] || isAudiobookCoverUrlUploading">
                 </p-button>
                 @if (!book.metadata!['audiobookCoverLocked']) {
                   <p-button [pTooltip]="t('lockCoverTooltip')" tooltipPosition="top" size="small" icon="pi pi-lock-open" [outlined]="true" (onClick)="toggleLock('audiobookCover')" severity="success"></p-button>
@@ -210,7 +211,8 @@
                     [(ngModel)]="audiobookCoverUrlInput"
                     [ngModelOptions]="{standalone: true}"
                     [placeholder]="t('coverUrlPlaceholder')"
-                    (keyup.enter)="submitAudiobookCoverUrl()"/>
+                    (keyup.enter)="submitAudiobookCoverUrl()"
+                    (keyup.escape)="toggleAudiobookCoverUrlInput()"/>
                   <p-button
                     icon="pi pi-check"
                     size="small"

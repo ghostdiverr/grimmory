@@ -929,7 +929,7 @@ export class MetadataEditorComponent implements OnInit {
   }
 
   submitCoverUrl(): void {
-    const url = this.coverUrlInput?.trim();
+    const url = this.coverUrlInput.trim();
     if (!url) return;
     this.isCoverUrlUploading = true;
     this.bookMetadataManageService.uploadCoverFromUrl(this.currentBookId, url)
@@ -959,7 +959,7 @@ export class MetadataEditorComponent implements OnInit {
   }
 
   submitAudiobookCoverUrl(): void {
-    const url = this.audiobookCoverUrlInput?.trim();
+    const url = this.audiobookCoverUrlInput.trim();
     if (!url) return;
     this.isAudiobookCoverUrlUploading = true;
     this.bookMetadataManageService.uploadAudiobookCoverFromUrl(this.currentBookId, url)

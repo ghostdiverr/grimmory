@@ -21,17 +21,12 @@ import tools.jackson.databind.ObjectMapper;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
-import java.security.SecureRandom;
-import java.security.cert.X509Certificate;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -46,24 +41,9 @@ public class BabelioBookParser implements BookParser, DetailedMetadataProvider {
     private static final String BOUNDARY = "GrimmoryBoundary";
     private static final String CRLF = "\r\n";
 
-    private static final HttpClient HTTP_CLIENT = buildTrustAllHttpClient();
-
-    private static HttpClient buildTrustAllHttpClient() {
-        try {
-            SSLContext sslContext = SSLContext.getInstance("TLS");
-            sslContext.init(null, new TrustManager[]{new X509TrustManager() {
-                public X509Certificate[] getAcceptedIssuers() { return new X509Certificate[0]; }
-                public void checkClientTrusted(X509Certificate[] c, String a) {}
-                public void checkServerTrusted(X509Certificate[] c, String a) {}
-            }}, new SecureRandom());
-            return HttpClient.newBuilder()
-                    .sslContext(sslContext)
-                    .followRedirects(HttpClient.Redirect.NORMAL)
-                    .build();
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to initialize Babelio HTTP client", e);
-        }
-    }
+    private static final HttpClient HTTP_CLIENT = HttpClient.newBuilder()
+            .followRedirects(HttpClient.Redirect.NORMAL)
+            .build();
 
     private final AppSettingService appSettingService;
     private final ObjectMapper objectMapper;

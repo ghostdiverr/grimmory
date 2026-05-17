@@ -1,6 +1,5 @@
 package org.booklore.service.metadata.parser;
 
-import org.booklore.exception.BabelioCredentialsException;
 import org.booklore.model.dto.Book;
 import org.booklore.model.dto.BookMetadata;
 import org.booklore.model.dto.request.FetchMetadataRequest;
@@ -60,6 +59,16 @@ class BabelioBookParserTest {
         }
     }
 
+    private AppSettings disabledSettings() {
+        MetadataProviderSettings.Babelio babelio = new MetadataProviderSettings.Babelio();
+        babelio.setEnabled(false);
+        babelio.setUserLogin("user@example.com");
+        babelio.setPassword("secret");
+        MetadataProviderSettings settings = new MetadataProviderSettings();
+        settings.setBabelio(babelio);
+        return AppSettings.builder().metadataProviderSettings(settings).build();
+    }
+
     private AppSettings enabledSettings() {
         MetadataProviderSettings.Babelio babelio = new MetadataProviderSettings.Babelio();
         babelio.setEnabled(true);
@@ -92,7 +101,23 @@ class BabelioBookParserTest {
     }
 
     @Test
-    void fetchMetadata_missingCredentials_throwsException() {
+    void fetchMetadata_disabled_returnsEmpty() {
+        when(appSettingService.getAppSettings()).thenReturn(disabledSettings());
+        List<BookMetadata> results = parser.fetchMetadata(emptyBook(), isbnRequest("9782070612758"));
+        assertTrue(results.isEmpty());
+        verifyNoInteractions(httpClient);
+    }
+
+    @Test
+    void fetchTopMetadata_disabled_returnsNull() {
+        when(appSettingService.getAppSettings()).thenReturn(disabledSettings());
+        BookMetadata result = parser.fetchTopMetadata(emptyBook(), isbnRequest("9782070612758"));
+        assertNull(result);
+        verifyNoInteractions(httpClient);
+    }
+
+    @Test
+    void fetchMetadata_missingCredentials_returnsEmpty() {
         MetadataProviderSettings.Babelio babelio = new MetadataProviderSettings.Babelio();
         babelio.setEnabled(true);
         MetadataProviderSettings settings = new MetadataProviderSettings();
@@ -100,8 +125,10 @@ class BabelioBookParserTest {
         when(appSettingService.getAppSettings()).thenReturn(
                 AppSettings.builder().metadataProviderSettings(settings).build());
 
-        assertThrows(BabelioCredentialsException.class,
-                () -> parser.fetchMetadata(emptyBook(), isbnRequest("9782070612758")));
+        List<BookMetadata> results = parser.fetchMetadata(emptyBook(), isbnRequest("9782070612758"));
+
+        assertTrue(results.isEmpty());
+        verifyNoInteractions(httpClient);
     }
 
     @Test

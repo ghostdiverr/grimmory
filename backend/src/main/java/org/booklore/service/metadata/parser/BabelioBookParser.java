@@ -2,7 +2,6 @@ package org.booklore.service.metadata.parser;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.booklore.exception.BabelioCredentialsException;
 import org.booklore.model.dto.Book;
 import org.booklore.model.dto.BookMetadata;
 import org.booklore.model.dto.request.FetchMetadataRequest;
@@ -73,6 +72,7 @@ public class BabelioBookParser implements BookParser, DetailedMetadataProvider {
         log.info("Babelio: ISBN lookup — action=search_book request={}", isbn);
         try {
             String json = post(Map.of("action", "search_book", "request", isbn, "page", "1"));
+            if (json == null) return Collections.emptyList();
             BabelioSearchBookResponse resp = objectMapper.readValue(json, BabelioSearchBookResponse.class);
             if (resp.getBooks() == null || resp.getBooks().isEmpty()) {
                 log.info("Babelio: ISBN lookup returned no results for isbn={}", isbn);
@@ -86,9 +86,7 @@ public class BabelioBookParser implements BookParser, DetailedMetadataProvider {
                         return fetchAndBuildMetadata(b.getBookId(), b.getIdEdition());
                     })
                     .filter(Objects::nonNull)
-                    .collect(Collectors.toList());
-        } catch (BabelioCredentialsException e) {
-            throw e;
+                    .toList();
         } catch (Exception e) {
             log.error("Babelio: ISBN lookup failed for isbn={}: {}", isbn, e.getMessage());
             return Collections.emptyList();
@@ -104,23 +102,23 @@ public class BabelioBookParser implements BookParser, DetailedMetadataProvider {
         log.info("Babelio: text search — action=suggesteur_recherche term=\"{}\"", term);
         try {
             String json = post(Map.of("action", "suggesteur_recherche", "term", term, "test_series", "1"));
+            if (json == null) return Collections.emptyList();
             BabelioSearchResult result = objectMapper.readValue(json, BabelioSearchResult.class);
             if (result.getResults() == null || result.getResults().isEmpty()) {
                 log.info("Babelio: text search returned no results for term=\"{}\"", term);
                 return Collections.emptyList();
             }
-            long bookCount = result.getResults().stream().filter(r -> "livres".equals(r.getType())).count();
-            log.info("Babelio: text search returned {} book result(s) for term=\"{}\"", bookCount, term);
-            return result.getResults().stream()
+            List<BabelioSearchResult.Result> books = result.getResults().stream()
                     .filter(r -> "livres".equals(r.getType()) && r.getIdOeuvre() != null)
+                    .toList();
+            log.info("Babelio: text search returned {} book result(s) for term=\"{}\"", books.size(), term);
+            return books.stream()
                     .map(r -> {
                         log.info("Babelio: fetching details — action=book_all book_id={} id_edition=undefined", r.getIdOeuvre());
                         return fetchAndBuildMetadata(r.getIdOeuvre(), null);
                     })
                     .filter(Objects::nonNull)
-                    .collect(Collectors.toList());
-        } catch (BabelioCredentialsException e) {
-            throw e;
+                    .toList();
         } catch (Exception e) {
             log.error("Babelio: text search failed for term=\"{}\": {}", term, e.getMessage());
             return Collections.emptyList();
@@ -142,6 +140,7 @@ public class BabelioBookParser implements BookParser, DetailedMetadataProvider {
         log.info("Babelio: top-metadata search — action=suggesteur_recherche term=\"{}\"", term);
         try {
             String json = post(Map.of("action", "suggesteur_recherche", "term", term));
+            if (json == null) return null;
             BabelioSearchResult result = objectMapper.readValue(json, BabelioSearchResult.class);
             if (result.getResults() == null || result.getResults().isEmpty()) {
                 log.info("Babelio: search returned no results for term=\"{}\"", term);
@@ -150,16 +149,10 @@ public class BabelioBookParser implements BookParser, DetailedMetadataProvider {
             String id = result.getResults().getFirst().getIdOeuvre();
             log.info("Babelio: using top result book_id={} for term=\"{}\"", id, term);
             return id;
-        } catch (BabelioCredentialsException e) {
-            throw e;
         } catch (Exception e) {
             log.error("Babelio: search failed for term=\"{}\": {}", term, e.getMessage());
         }
         return null;
-    }
-
-    private BookMetadata fetchAndBuildMetadata(String babelioId) {
-        return fetchAndBuildMetadata(babelioId, null);
     }
 
     private BookMetadata fetchAndBuildMetadata(String babelioId, String idEdition) {
@@ -167,6 +160,7 @@ public class BabelioBookParser implements BookParser, DetailedMetadataProvider {
         try {
             String json = post(Map.of("action", "book_all", "book_id", babelioId,
                     "id_edition", editionParam, "no_cache", "1"));
+            if (json == null) return null;
             BabelioBookDetails details = objectMapper.readValue(json, BabelioBookDetails.class);
             if (details.getBookAll() == null
                     || details.getBookAll().getBookInfoGlobal() == null
@@ -188,8 +182,6 @@ public class BabelioBookParser implements BookParser, DetailedMetadataProvider {
             }
 
             return mapToBookMetadata(babelioId, details, editionOverride);
-        } catch (BabelioCredentialsException e) {
-            throw e;
         } catch (Exception e) {
             log.error("Babelio: book_all failed for book_id={} id_edition={}: {}", babelioId, editionParam, e.getMessage());
             return null;
@@ -200,14 +192,13 @@ public class BabelioBookParser implements BookParser, DetailedMetadataProvider {
         log.info("Babelio: fetching edition data — action=f_editions_livre id_oeuvre={} target_id_edition={}", bookId, idEdition);
         try {
             String json = post(Map.of("action", "f_editions_livre", "id_oeuvre", bookId, "page", "1"));
+            if (json == null) return null;
             BabelioEditionsResponse resp = objectMapper.readValue(json, BabelioEditionsResponse.class);
             if (resp.getEditions() == null) return null;
             return resp.getEditions().stream()
                     .filter(e -> idEdition.equals(e.getId()))
                     .findFirst()
                     .orElse(null);
-        } catch (BabelioCredentialsException e) {
-            throw e;
         } catch (Exception e) {
             log.warn("Babelio: f_editions_livre failed for id_oeuvre={}: {}", bookId, e.getMessage());
             return null;
@@ -222,7 +213,7 @@ public class BabelioBookParser implements BookParser, DetailedMetadataProvider {
                 .stream()
                 .map(a -> (a.getFirstName() + " " + a.getLastName()).trim())
                 .filter(s -> !s.isBlank())
-                .collect(Collectors.toList());
+                .toList();
 
         Set<String> categories = Optional.ofNullable(details.getBookAll().getTagsOnBook())
                 .map(BabelioBookDetails.TagsOnBook::getTags)
@@ -282,16 +273,17 @@ public class BabelioBookParser implements BookParser, DetailedMetadataProvider {
 
     // ── Authentication ───────────────────────────────────────────────────────
 
-    private void ensureAuthenticated() throws IOException, InterruptedException {
-        if (cachedToken != null && cachedUserId != null) return;
+    private boolean ensureAuthenticated() throws IOException, InterruptedException {
+        if (cachedToken != null && cachedUserId != null) return true;
         synchronized (this) {
-            if (cachedToken != null && cachedUserId != null) return;
-            login();
+            if (cachedToken != null && cachedUserId != null) return true;
+            return login();
         }
     }
 
-    private synchronized void login() throws IOException, InterruptedException {
+    private synchronized boolean login() throws IOException, InterruptedException {
         MetadataProviderSettings.Babelio settings = getSettings();
+        if (settings == null) return false;
         Map<String, String> fields = new LinkedHashMap<>();
         fields.put("action", "connect_reader");
         fields.put("user_login", settings.getUserLogin());
@@ -300,11 +292,13 @@ public class BabelioBookParser implements BookParser, DetailedMetadataProvider {
         String json = sendRequest(fields);
         BabelioLoginResponse resp = objectMapper.readValue(json, BabelioLoginResponse.class);
         if (resp.getSuccess() == 0) {
-            throw new BabelioCredentialsException("Connexion Babelio échouée : " + resp.getReason());
+            log.warn("Babelio: action=connect_reader — login failed: {}", resp.getReason());
+            return false;
         }
         cachedToken = resp.getToken();
         cachedUserId = resp.getUserId();
         log.info("Babelio: action=connect_reader — login successful, user_id={}", cachedUserId);
+        return true;
     }
 
     private String computeSessionId(String userId, long timestamp, String action, String token) {
@@ -321,11 +315,7 @@ public class BabelioBookParser implements BookParser, DetailedMetadataProvider {
 
     private boolean isAuthFailure(String json) {
         try {
-            JsonNode node = objectMapper.readTree(json);
-            int code = node.path("code").asInt(0);
-            int success = node.path("success").asInt(1);
-            String reason = node.path("reason").asText("");
-            return code == 4 || (success == 0 && reason.contains("authentification failure"));
+            return objectMapper.readTree(json).path("code").asInt(0) == 4;
         } catch (Exception e) {
             return false;
         }
@@ -335,12 +325,13 @@ public class BabelioBookParser implements BookParser, DetailedMetadataProvider {
 
     private String post(Map<String, String> extraFields)
             throws IOException, InterruptedException {
-        ensureAuthenticated();
+        if (!ensureAuthenticated()) return null;
         return postWithAuth(extraFields, true);
     }
 
     private String postWithAuth(Map<String, String> extraFields, boolean retry)
             throws IOException, InterruptedException {
+        if (cachedToken == null || cachedUserId == null) return null;
         String action = extraFields.get("action");
         long timestamp = System.currentTimeMillis();
         String sessionId = computeSessionId(cachedUserId, timestamp, action, cachedToken);
@@ -358,7 +349,7 @@ public class BabelioBookParser implements BookParser, DetailedMetadataProvider {
             synchronized (this) {
                 cachedToken = null;
                 cachedUserId = null;
-                login();
+                if (!login()) return null;
             }
             return postWithAuth(extraFields, false);
         }
@@ -396,11 +387,14 @@ public class BabelioBookParser implements BookParser, DetailedMetadataProvider {
     private MetadataProviderSettings.Babelio getSettings() {
         MetadataProviderSettings.Babelio settings = appSettingService.getAppSettings()
                 .getMetadataProviderSettings().getBabelio();
-        if (settings == null
-                || settings.getUserLogin() == null || settings.getUserLogin().isBlank()
+        if (settings == null || !settings.isEnabled()) {
+            log.debug("Babelio: provider disabled");
+            return null;
+        }
+        if (settings.getUserLogin() == null || settings.getUserLogin().isBlank()
                 || settings.getPassword() == null || settings.getPassword().isBlank()) {
-            throw new BabelioCredentialsException(
-                    "Identifiants Babelio manquants, veuillez configurer vos paramètres");
+            log.warn("Babelio: credentials not configured");
+            return null;
         }
         return settings;
     }

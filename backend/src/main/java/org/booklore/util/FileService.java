@@ -49,6 +49,22 @@ public class FileService {
     private final RestTemplate noRedirectRestTemplate;
 
     private static final int MAX_REDIRECTS = 5;
+    private static final HttpEntity<String> BROWSER_IMAGE_REQUEST;
+
+    static {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set(HttpHeaders.USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36");
+        headers.set(HttpHeaders.ACCEPT, "image/avif,image/webp,image/apng,image/*,*/*;q=0.8");
+        headers.set(HttpHeaders.ACCEPT_LANGUAGE, "en-US,en;q=0.9");
+        headers.set(HttpHeaders.ACCEPT_ENCODING, "gzip, deflate, br");
+        headers.set("Sec-Fetch-Dest", "image");
+        headers.set("Sec-Fetch-Mode", "no-cors");
+        headers.set("Sec-Fetch-Site", "cross-site");
+        headers.set("Sec-Ch-Ua", "\"Chromium\";v=\"124\", \"Google Chrome\";v=\"124\", \"Not-A.Brand\";v=\"99\"");
+        headers.set("Sec-Ch-Ua-Mobile", "?0");
+        headers.set("Sec-Ch-Ua-Platform", "\"Windows\"");
+        BROWSER_IMAGE_REQUEST = new HttpEntity<>(headers);
+    }
 
 
     private static final double TARGET_COVER_ASPECT_RATIO = 1.5;
@@ -329,26 +345,13 @@ public class FileService {
                 }
             }
 
-            HttpHeaders headers = new HttpHeaders();
-            headers.set(HttpHeaders.USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36");
-            headers.set(HttpHeaders.ACCEPT, "image/avif,image/webp,image/apng,image/*,*/*;q=0.8");
-            headers.set(HttpHeaders.ACCEPT_LANGUAGE, "en-US,en;q=0.9");
-            headers.set(HttpHeaders.ACCEPT_ENCODING, "gzip, deflate, br");
-            headers.set("Sec-Fetch-Dest", "image");
-            headers.set("Sec-Fetch-Mode", "no-cors");
-            headers.set("Sec-Fetch-Site", "cross-site");
-            headers.set("Sec-Ch-Ua", "\"Chromium\";v=\"124\", \"Google Chrome\";v=\"124\", \"Not-A.Brand\";v=\"99\"");
-            headers.set("Sec-Ch-Ua-Mobile", "?0");
-            headers.set("Sec-Ch-Ua-Platform", "\"Windows\"");
-
-            HttpEntity<String> entity = new HttpEntity<>(headers);
 
             log.debug("Downloading image from: {}", currentUrl);
 
             ResponseEntity<byte[]> response = noRedirectRestTemplate.exchange(
                     currentUrl,
                     HttpMethod.GET,
-                    entity,
+                    BROWSER_IMAGE_REQUEST,
                     byte[].class
             );
 

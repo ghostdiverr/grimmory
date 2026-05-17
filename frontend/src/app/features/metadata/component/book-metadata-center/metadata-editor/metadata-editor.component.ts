@@ -117,8 +117,10 @@ export class MetadataEditorComponent implements OnInit {
   isGeneratingAudiobookCover = false;
   showCoverUrlInput = false;
   coverUrlInput = '';
+  isCoverUrlUploading = false;
   showAudiobookCoverUrlInput = false;
   audiobookCoverUrlInput = '';
+  isAudiobookCoverUrlUploading = false;
 
   refreshingBookIds = new Set<number>();
   isAutoFetching = false;
@@ -927,19 +929,20 @@ export class MetadataEditorComponent implements OnInit {
   }
 
   submitCoverUrl(): void {
-    if (!this.coverUrlInput?.trim()) return;
-    this.isUploading = true;
-    this.bookMetadataManageService.uploadCoverFromUrl(this.currentBookId, this.coverUrlInput.trim())
+    const url = this.coverUrlInput?.trim();
+    if (!url) return;
+    this.isCoverUrlUploading = true;
+    this.bookMetadataManageService.uploadCoverFromUrl(this.currentBookId, url)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
-          this.isUploading = false;
+          this.isCoverUrlUploading = false;
           this.showCoverUrlInput = false;
           this.coverUrlInput = '';
           this.bookService.handleBookMetadataUpdate(this.currentBookId);
         },
         error: () => {
-          this.isUploading = false;
+          this.isCoverUrlUploading = false;
           this.messageService.add({
             severity: 'error',
             summary: this.t.translate('metadata.editor.toast.uploadFailedSummary'),
@@ -956,19 +959,20 @@ export class MetadataEditorComponent implements OnInit {
   }
 
   submitAudiobookCoverUrl(): void {
-    if (!this.audiobookCoverUrlInput?.trim()) return;
-    this.isUploading = true;
-    this.bookMetadataManageService.uploadAudiobookCoverFromUrl(this.currentBookId, this.audiobookCoverUrlInput.trim())
+    const url = this.audiobookCoverUrlInput?.trim();
+    if (!url) return;
+    this.isAudiobookCoverUrlUploading = true;
+    this.bookMetadataManageService.uploadAudiobookCoverFromUrl(this.currentBookId, url)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
-          this.isUploading = false;
+          this.isAudiobookCoverUrlUploading = false;
           this.showAudiobookCoverUrlInput = false;
           this.audiobookCoverUrlInput = '';
           this.bookService.handleBookMetadataUpdate(this.currentBookId);
         },
         error: () => {
-          this.isUploading = false;
+          this.isAudiobookCoverUrlUploading = false;
           this.messageService.add({
             severity: 'error',
             summary: this.t.translate('metadata.editor.toast.uploadFailedSummary'),

@@ -315,11 +315,7 @@ public class BabelioBookParser implements BookParser, DetailedMetadataProvider {
 
     private boolean isAuthFailure(String json) {
         try {
-            JsonNode node = objectMapper.readTree(json);
-            int code = node.path("code").asInt(0);
-            int success = node.path("success").asInt(1);
-            String reason = node.path("reason").asText("");
-            return code == 4 || (success == 0 && reason.contains("authentification failure"));
+            return objectMapper.readTree(json).path("code").asInt(0) == 4;
         } catch (Exception e) {
             return false;
         }
@@ -391,8 +387,11 @@ public class BabelioBookParser implements BookParser, DetailedMetadataProvider {
     private MetadataProviderSettings.Babelio getSettings() {
         MetadataProviderSettings.Babelio settings = appSettingService.getAppSettings()
                 .getMetadataProviderSettings().getBabelio();
-        if (settings == null
-                || settings.getUserLogin() == null || settings.getUserLogin().isBlank()
+        if (settings == null || !settings.isEnabled()) {
+            log.debug("Babelio: provider disabled");
+            return null;
+        }
+        if (settings.getUserLogin() == null || settings.getUserLogin().isBlank()
                 || settings.getPassword() == null || settings.getPassword().isBlank()) {
             log.warn("Babelio: credentials not configured");
             return null;

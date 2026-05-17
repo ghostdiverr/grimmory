@@ -59,6 +59,16 @@ class BabelioBookParserTest {
         }
     }
 
+    private AppSettings disabledSettings() {
+        MetadataProviderSettings.Babelio babelio = new MetadataProviderSettings.Babelio();
+        babelio.setEnabled(false);
+        babelio.setUserLogin("user@example.com");
+        babelio.setPassword("secret");
+        MetadataProviderSettings settings = new MetadataProviderSettings();
+        settings.setBabelio(babelio);
+        return AppSettings.builder().metadataProviderSettings(settings).build();
+    }
+
     private AppSettings enabledSettings() {
         MetadataProviderSettings.Babelio babelio = new MetadataProviderSettings.Babelio();
         babelio.setEnabled(true);
@@ -88,6 +98,22 @@ class BabelioBookParserTest {
         BookMetadata result = parser.fetchTopMetadata(emptyBook(), FetchMetadataRequest.builder().build());
         assertNull(result);
         verifyNoInteractions(httpClient, appSettingService);
+    }
+
+    @Test
+    void fetchMetadata_disabled_returnsEmpty() {
+        when(appSettingService.getAppSettings()).thenReturn(disabledSettings());
+        List<BookMetadata> results = parser.fetchMetadata(emptyBook(), isbnRequest("9782070612758"));
+        assertTrue(results.isEmpty());
+        verifyNoInteractions(httpClient);
+    }
+
+    @Test
+    void fetchTopMetadata_disabled_returnsNull() {
+        when(appSettingService.getAppSettings()).thenReturn(disabledSettings());
+        BookMetadata result = parser.fetchTopMetadata(emptyBook(), isbnRequest("9782070612758"));
+        assertNull(result);
+        verifyNoInteractions(httpClient);
     }
 
     @Test

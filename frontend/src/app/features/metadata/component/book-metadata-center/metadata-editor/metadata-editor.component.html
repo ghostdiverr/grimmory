@@ -87,7 +87,7 @@
                   [pTooltip]="t('coverUrlTooltip')"
                   tooltipPosition="top"
                   [outlined]="true"
-                  severity="info"
+                  styleClass="cover-url-btn"
                   size="small"
                   [disabled]="book.metadata!['coverLocked'] || isCoverUrlUploading">
                 </p-button>
@@ -170,7 +170,7 @@
                   (onClick)="openAudiobookCoverSearch()"
                   [pTooltip]="t('searchAudiobookCoverTooltip')"
                   tooltipPosition="top"
-                  severity="info">
+                  severity="warn">
                 </p-button>
                 <p-fileupload
                   [chooseStyleClass]="'p-button-sm p-button-outlined p-button-danger'"
@@ -193,7 +193,7 @@
                   [pTooltip]="t('audiobookCoverUrlTooltip')"
                   tooltipPosition="top"
                   [outlined]="true"
-                  severity="info"
+                  styleClass="cover-url-btn"
                   size="small"
                   [disabled]="book.metadata!['audiobookCoverLocked'] || isAudiobookCoverUrlUploading">
                 </p-button>
@@ -1027,8 +1027,8 @@
             <div class="navigation-left">
               <p-button [label]="t('closeBtn')" icon="pi pi-times" [outlined]="true" severity="danger" (onClick)="closeDialog()"></p-button>
               <p-divider layout="vertical"/>
-              <p-button [label]="t('previousBookBtn')" [disabled]="disablePrevious" icon="pi pi-arrow-left" [outlined]="true" severity="info" (onClick)="onPrevious()"></p-button>
-              <p-button [label]="t('nextBookBtn')" [disabled]="disableNext" icon="pi pi-arrow-right" iconPos="right" [outlined]="true" severity="info" (onClick)="onNext()"></p-button>
+              <p-button [label]="t('previousBookBtn')" [disabled]="disablePrevious" icon="pi pi-arrow-left" [outlined]="true" severity="warn" (onClick)="onPrevious()"></p-button>
+              <p-button [label]="t('nextBookBtn')" [disabled]="disableNext" icon="pi pi-arrow-right" iconPos="right" [outlined]="true" severity="warn" (onClick)="onNext()"></p-button>
             </div>
           }
 
@@ -1040,7 +1040,7 @@
                 (onClick)="navigatePrevious()"
                 rounded
                 outlined
-                severity="info"
+                severity="warn"
                 [pTooltip]="t('previousBookTooltip')"
                 tooltipPosition="bottom">
               </p-button>
@@ -1052,7 +1052,7 @@
                 iconPos="right"
                 [disabled]="!canNavigateNext()"
                 (onClick)="navigateNext()"
-                severity="info"
+                severity="warn"
                 rounded
                 outlined
                 [pTooltip]="t('nextBookTooltip')"
@@ -1078,7 +1078,7 @@
               [label]="isAutoFetching ? t('fetchingBtn') : t('autoFetchBtn')"
               [icon]="isAutoFetching ? 'pi pi-spin pi-spinner' : 'pi pi-bolt'"
               [outlined]="true"
-              severity="info"
+              severity="warn"
               (onClick)="autoFetch(book.id)"
               [disabled]="isAutoFetching"
               [pTooltip]="t('autoFetchTooltip')"
@@ -1097,8 +1097,8 @@
           @if (showNavigationButtons) {
             <div class="mobile-nav-buttons">
               <p-button size="small" icon="pi pi-times" [outlined]="true" severity="danger" (onClick)="closeDialog()" [pTooltip]="t('closeBtn')" tooltipPosition="top"></p-button>
-              <p-button size="small" icon="pi pi-arrow-left" [disabled]="disablePrevious" [outlined]="true" severity="info" (onClick)="onPrevious()" [pTooltip]="t('previousBookBtn')" tooltipPosition="top"></p-button>
-              <p-button size="small" icon="pi pi-arrow-right" [disabled]="disableNext" iconPos="right" [outlined]="true" severity="info" (onClick)="onNext()" [pTooltip]="t('nextBookBtn')" tooltipPosition="top"></p-button>
+              <p-button size="small" icon="pi pi-arrow-left" [disabled]="disablePrevious" [outlined]="true" severity="warn" (onClick)="onPrevious()" [pTooltip]="t('previousBookBtn')" tooltipPosition="top"></p-button>
+              <p-button size="small" icon="pi pi-arrow-right" [disabled]="disableNext" iconPos="right" [outlined]="true" severity="warn" (onClick)="onNext()" [pTooltip]="t('nextBookBtn')" tooltipPosition="top"></p-button>
             </div>
           }
 
@@ -1111,7 +1111,7 @@
                   (onClick)="navigatePrevious()"
                   rounded
                   outlined
-                  severity="info"
+                  severity="warn"
                   [pTooltip]="t('previousBookTooltip')"
                   tooltipPosition="bottom">
                 </p-button>
@@ -1123,7 +1123,7 @@
                   iconPos="right"
                   [disabled]="!canNavigateNext()"
                   (onClick)="navigateNext()"
-                  severity="info"
+                  severity="warn"
                   rounded
                   outlined
                   [pTooltip]="t('nextBookTooltip')"
@@ -1146,7 +1146,7 @@
               <p-button
                 icon="pi pi-bolt"
                 [outlined]="true"
-                severity="info"
+                severity="warn"
                 (onClick)="autoFetch(book.id)"
                 [disabled]="isAutoFetching"
                 [pTooltip]="t('autoFetchBtn')"

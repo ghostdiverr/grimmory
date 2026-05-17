@@ -86,7 +86,7 @@ public class BabelioBookParser implements BookParser, DetailedMetadataProvider {
                         return fetchAndBuildMetadata(b.getBookId(), b.getIdEdition());
                     })
                     .filter(Objects::nonNull)
-                    .collect(Collectors.toList());
+                    .toList();
         } catch (Exception e) {
             log.error("Babelio: ISBN lookup failed for isbn={}: {}", isbn, e.getMessage());
             return Collections.emptyList();
@@ -108,16 +108,17 @@ public class BabelioBookParser implements BookParser, DetailedMetadataProvider {
                 log.info("Babelio: text search returned no results for term=\"{}\"", term);
                 return Collections.emptyList();
             }
-            long bookCount = result.getResults().stream().filter(r -> "livres".equals(r.getType())).count();
-            log.info("Babelio: text search returned {} book result(s) for term=\"{}\"", bookCount, term);
-            return result.getResults().stream()
+            List<BabelioSearchResult.Result> books = result.getResults().stream()
                     .filter(r -> "livres".equals(r.getType()) && r.getIdOeuvre() != null)
+                    .toList();
+            log.info("Babelio: text search returned {} book result(s) for term=\"{}\"", books.size(), term);
+            return books.stream()
                     .map(r -> {
                         log.info("Babelio: fetching details — action=book_all book_id={} id_edition=undefined", r.getIdOeuvre());
                         return fetchAndBuildMetadata(r.getIdOeuvre(), null);
                     })
                     .filter(Objects::nonNull)
-                    .collect(Collectors.toList());
+                    .toList();
         } catch (Exception e) {
             log.error("Babelio: text search failed for term=\"{}\": {}", term, e.getMessage());
             return Collections.emptyList();
@@ -212,7 +213,7 @@ public class BabelioBookParser implements BookParser, DetailedMetadataProvider {
                 .stream()
                 .map(a -> (a.getFirstName() + " " + a.getLastName()).trim())
                 .filter(s -> !s.isBlank())
-                .collect(Collectors.toList());
+                .toList();
 
         Set<String> categories = Optional.ofNullable(details.getBookAll().getTagsOnBook())
                 .map(BabelioBookDetails.TagsOnBook::getTags)

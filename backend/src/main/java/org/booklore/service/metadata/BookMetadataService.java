@@ -3,8 +3,6 @@ package org.booklore.service.metadata;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.booklore.exception.ApiError;
-import org.booklore.exception.BabelioCredentialsException;
-import org.booklore.model.websocket.LogNotification;
 import org.booklore.mapper.BookMapper;
 import org.booklore.mapper.BookMetadataMapper;
 import org.booklore.mapper.MetadataClearFlagsMapper;
@@ -99,9 +97,6 @@ public class BookMetadataService {
                     Flux.defer(() -> getParser(provider).fetchMetadataStream(book, request))
                             .subscribeOn(Schedulers.boundedElastic())
                             .onErrorResume(e -> {
-                                if (e instanceof BabelioCredentialsException) {
-                                    notificationService.sendMessage(Topic.LOG, LogNotification.warn(e.getMessage()));
-                                }
                                 log.error("Error fetching metadata from provider: {}", provider, e);
                                 return Flux.empty();
                             })

@@ -1,6 +1,5 @@
 package org.booklore.service.metadata.parser;
 
-import org.booklore.exception.BabelioCredentialsException;
 import org.booklore.model.dto.Book;
 import org.booklore.model.dto.BookMetadata;
 import org.booklore.model.dto.request.FetchMetadataRequest;
@@ -92,7 +91,7 @@ class BabelioBookParserTest {
     }
 
     @Test
-    void fetchMetadata_missingCredentials_throwsException() {
+    void fetchMetadata_missingCredentials_returnsEmpty() {
         MetadataProviderSettings.Babelio babelio = new MetadataProviderSettings.Babelio();
         babelio.setEnabled(true);
         MetadataProviderSettings settings = new MetadataProviderSettings();
@@ -100,8 +99,10 @@ class BabelioBookParserTest {
         when(appSettingService.getAppSettings()).thenReturn(
                 AppSettings.builder().metadataProviderSettings(settings).build());
 
-        assertThrows(BabelioCredentialsException.class,
-                () -> parser.fetchMetadata(emptyBook(), isbnRequest("9782070612758")));
+        List<BookMetadata> results = parser.fetchMetadata(emptyBook(), isbnRequest("9782070612758"));
+
+        assertTrue(results.isEmpty());
+        verifyNoInteractions(httpClient);
     }
 
     @Test

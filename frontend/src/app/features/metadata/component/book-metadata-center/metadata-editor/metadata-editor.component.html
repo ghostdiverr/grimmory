@@ -102,8 +102,8 @@
                 <div class="cover-url-input">
                   <input
                     pInputText
-                    size="small"
                     [(ngModel)]="coverUrlInput"
+                    [ngModelOptions]="{standalone: true}"
                     [placeholder]="t('coverUrlPlaceholder')"
                     (keyup.enter)="submitCoverUrl()"/>
                   <p-button
@@ -207,8 +207,8 @@
                 <div class="cover-url-input">
                   <input
                     pInputText
-                    size="small"
                     [(ngModel)]="audiobookCoverUrlInput"
+                    [ngModelOptions]="{standalone: true}"
                     [placeholder]="t('coverUrlPlaceholder')"
                     (keyup.enter)="submitAudiobookCoverUrl()"/>
                   <p-button

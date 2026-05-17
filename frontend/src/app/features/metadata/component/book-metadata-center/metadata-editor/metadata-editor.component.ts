@@ -115,6 +115,10 @@ export class MetadataEditorComponent implements OnInit {
   isSaving = false;
   isGeneratingCover = false;
   isGeneratingAudiobookCover = false;
+  showCoverUrlInput = false;
+  coverUrlInput = '';
+  showAudiobookCoverUrlInput = false;
+  audiobookCoverUrlInput = '';
 
   refreshingBookIds = new Set<number>();
   isAutoFetching = false;
@@ -915,6 +919,64 @@ export class MetadataEditorComponent implements OnInit {
 
   getUploadCoverUrl(): string {
     return this.bookMetadataManageService.getUploadCoverUrl(this.currentBookId);
+  }
+
+  toggleCoverUrlInput(): void {
+    this.showCoverUrlInput = !this.showCoverUrlInput;
+    if (!this.showCoverUrlInput) this.coverUrlInput = '';
+  }
+
+  submitCoverUrl(): void {
+    if (!this.coverUrlInput?.trim()) return;
+    this.isUploading = true;
+    this.bookMetadataManageService.uploadCoverFromUrl(this.currentBookId, this.coverUrlInput.trim())
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.isUploading = false;
+          this.showCoverUrlInput = false;
+          this.coverUrlInput = '';
+          this.bookService.handleBookMetadataUpdate(this.currentBookId);
+        },
+        error: () => {
+          this.isUploading = false;
+          this.messageService.add({
+            severity: 'error',
+            summary: this.t.translate('metadata.editor.toast.uploadFailedSummary'),
+            detail: this.t.translate('metadata.editor.toast.uploadFailedDetail'),
+            life: 3000,
+          });
+        }
+      });
+  }
+
+  toggleAudiobookCoverUrlInput(): void {
+    this.showAudiobookCoverUrlInput = !this.showAudiobookCoverUrlInput;
+    if (!this.showAudiobookCoverUrlInput) this.audiobookCoverUrlInput = '';
+  }
+
+  submitAudiobookCoverUrl(): void {
+    if (!this.audiobookCoverUrlInput?.trim()) return;
+    this.isUploading = true;
+    this.bookMetadataManageService.uploadAudiobookCoverFromUrl(this.currentBookId, this.audiobookCoverUrlInput.trim())
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.isUploading = false;
+          this.showAudiobookCoverUrlInput = false;
+          this.audiobookCoverUrlInput = '';
+          this.bookService.handleBookMetadataUpdate(this.currentBookId);
+        },
+        error: () => {
+          this.isUploading = false;
+          this.messageService.add({
+            severity: 'error',
+            summary: this.t.translate('metadata.editor.toast.uploadFailedSummary'),
+            detail: this.t.translate('metadata.editor.toast.audiobookUploadFailed'),
+            life: 3000,
+          });
+        }
+      });
   }
 
   onBeforeSend(): void {

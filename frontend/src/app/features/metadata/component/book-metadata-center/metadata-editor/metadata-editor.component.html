@@ -81,6 +81,16 @@
                   [auto]="true"
                   (onBeforeUpload)="onBeforeSend()">
                 </p-fileupload>
+                <p-button
+                  icon="pi pi-link"
+                  (onClick)="toggleCoverUrlInput()"
+                  [pTooltip]="t('coverUrlTooltip')"
+                  tooltipPosition="top"
+                  [outlined]="true"
+                  severity="secondary"
+                  size="small"
+                  [disabled]="book.metadata!['coverLocked']">
+                </p-button>
                 @if (!book.metadata!['coverLocked']) {
                   <p-button [pTooltip]="t('lockCoverTooltip')" tooltipPosition="top" size="small" icon="pi pi-lock-open" [outlined]="true" (onClick)="toggleLock('thumbnailUrl')" severity="success"></p-button>
                 }
@@ -88,6 +98,22 @@
                   <p-button [pTooltip]="t('unlockCoverTooltip')" tooltipPosition="top" size="small" icon="pi pi-lock" [outlined]="true" (onClick)="toggleLock('thumbnailUrl')" severity="warn"></p-button>
                 }
               </div>
+              @if (showCoverUrlInput) {
+                <div class="cover-url-input">
+                  <input
+                    pInputText
+                    size="small"
+                    [(ngModel)]="coverUrlInput"
+                    [placeholder]="t('coverUrlPlaceholder')"
+                    (keyup.enter)="submitCoverUrl()"/>
+                  <p-button
+                    icon="pi pi-check"
+                    size="small"
+                    [loading]="isUploading"
+                    (onClick)="submitCoverUrl()">
+                  </p-button>
+                </div>
+              }
             </div>
           }
 
@@ -160,6 +186,16 @@
                   [auto]="true"
                   (onBeforeUpload)="onBeforeSend()">
                 </p-fileupload>
+                <p-button
+                  icon="pi pi-link"
+                  (onClick)="toggleAudiobookCoverUrlInput()"
+                  [pTooltip]="t('audiobookCoverUrlTooltip')"
+                  tooltipPosition="top"
+                  [outlined]="true"
+                  severity="secondary"
+                  size="small"
+                  [disabled]="book.metadata!['audiobookCoverLocked']">
+                </p-button>
                 @if (!book.metadata!['audiobookCoverLocked']) {
                   <p-button [pTooltip]="t('lockCoverTooltip')" tooltipPosition="top" size="small" icon="pi pi-lock-open" [outlined]="true" (onClick)="toggleLock('audiobookCover')" severity="success"></p-button>
                 }
@@ -167,6 +203,22 @@
                   <p-button [pTooltip]="t('unlockCoverTooltip')" tooltipPosition="top" size="small" icon="pi pi-lock" [outlined]="true" (onClick)="toggleLock('audiobookCover')" severity="warn"></p-button>
                 }
               </div>
+              @if (showAudiobookCoverUrlInput) {
+                <div class="cover-url-input">
+                  <input
+                    pInputText
+                    size="small"
+                    [(ngModel)]="audiobookCoverUrlInput"
+                    [placeholder]="t('coverUrlPlaceholder')"
+                    (keyup.enter)="submitAudiobookCoverUrl()"/>
+                  <p-button
+                    icon="pi pi-check"
+                    size="small"
+                    [loading]="isUploading"
+                    (onClick)="submitAudiobookCoverUrl()">
+                  </p-button>
+                </div>
+              }
             </div>
           }
         </div>

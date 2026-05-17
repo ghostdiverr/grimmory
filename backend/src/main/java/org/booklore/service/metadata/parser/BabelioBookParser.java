@@ -41,12 +41,9 @@ public class BabelioBookParser implements BookParser, DetailedMetadataProvider {
     private static final String BOUNDARY = "GrimmoryBoundary";
     private static final String CRLF = "\r\n";
 
-    private static final HttpClient HTTP_CLIENT = HttpClient.newBuilder()
-            .followRedirects(HttpClient.Redirect.NORMAL)
-            .build();
-
     private final AppSettingService appSettingService;
     private final ObjectMapper objectMapper;
+    private final HttpClient httpClient;
 
     private volatile String cachedToken;
     private volatile String cachedUserId;
@@ -375,7 +372,7 @@ public class BabelioBookParser implements BookParser, DetailedMetadataProvider {
                 .header("Content-Type", "multipart/form-data; boundary=" + BOUNDARY)
                 .POST(HttpRequest.BodyPublishers.ofString(buildMultipartBody(fields)))
                 .build();
-        HttpResponse<String> response = HTTP_CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() != 200) {
             throw new IOException("Babelio API returned HTTP " + response.statusCode());
         }

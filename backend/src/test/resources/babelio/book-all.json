@@ -1,0 +1,31 @@
+{
+  "success": 1,
+  "reason": null,
+  "book_all": {
+    "book_infoglobal": {
+      "book_info": {
+        "book_title": "Le Petit Prince",
+        "ISBN": "2070612759",
+        "ean13": "9782070612758",
+        "author_list": [
+          {"id_auteur": "1001", "first_name": "Antoine", "last_name": "de Saint-Exupéry"}
+        ],
+        "summary": "Le Petit Prince est une œuvre de langue française.",
+        "publisher_name": "Gallimard",
+        "publishing_date": "1943-04-06 00:00:00",
+        "nb_pages": "96",
+        "average_rating": "4.32",
+        "bookcoverbig_url": "/couv/petit-prince-big.jpg"
+      }
+    },
+    "tags_on_book": {
+      "tags": [
+        {"libelle": "Classique", "nb_occurrences": "42"},
+        {"libelle": "Philosophie", "nb_occurrences": "38"}
+      ]
+    },
+    "serie": [
+      {"id": "5678", "nom": "Le Petit Prince", "tome": "1"}
+    ]
+  }
+}

@@ -1,3 +1,14 @@
+::ng-deep .p-button.cover-url-btn.p-button-outlined {
+  color: #f59e0b;
+  border-color: #f59e0b;
+
+  &:not(:disabled):hover {
+    background: rgba(245, 158, 11, 0.08);
+    color: #f59e0b;
+    border-color: #f59e0b;
+  }
+}
+
 ::ng-deep .p-tabpanels .custom-tab-padding {
   padding: 1rem 0 0 0.5rem !important;
 

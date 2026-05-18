@@ -36,6 +36,7 @@
     "title": "Title",
     "subtitle": "Subtitle",
     "language": "Language",
+    "languagePlaceholder": "Select or type a language",
     "authors": "Authors",
     "publisher": "Publisher",
     "publishDate": "Publish Date",

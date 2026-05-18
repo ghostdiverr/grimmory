@@ -210,6 +210,14 @@
                   </button>
                   @if (field.controlName === 'publishedDate') {
                     <input pInputText formControlName="{{field.controlName}}" class="field-input" placeholder="YYYY-MM-DD"/>
+                  } @else if (field.controlName === 'language') {
+                    <p-select formControlName="language"
+                              [options]="languageOptions"
+                              optionLabel="name" optionValue="code"
+                              [filter]="true" filterBy="name,code"
+                              [showClear]="true"
+                              appendTo="body"
+                              styleClass="field-input"/>
                   } @else {
                     <input pInputText formControlName="{{field.controlName}}" class="field-input"/>
                   }
@@ -452,7 +460,17 @@
                   >
                     <i [class]="metadataForm.get(field.lockedKey)?.value ? 'pi pi-lock' : 'pi pi-lock-open'"></i>
                   </button>
-                  <input pInputText formControlName="{{field.controlName}}" class="field-input"/>
+                  @if (field.controlName === 'language') {
+                    <p-select formControlName="language"
+                              [options]="languageOptions"
+                              optionLabel="name" optionValue="code"
+                              [filter]="true" filterBy="name,code"
+                              [showClear]="true"
+                              appendTo="body"
+                              styleClass="field-input"/>
+                  } @else {
+                    <input pInputText formControlName="{{field.controlName}}" class="field-input"/>
+                  }
                 </div>
 
                 <button

@@ -14,6 +14,8 @@ import {Checkbox} from 'primeng/checkbox';
 import {AutoComplete} from 'primeng/autocomplete';
 import {AutoCompleteSelectEvent} from 'primeng/autocomplete';
 import {ProgressSpinner} from 'primeng/progressspinner';
+import {Select} from 'primeng/select';
+import {LanguageOption, LanguageService} from '../../../../shared/services/language.service';
 
 @Component({
   selector: 'app-bulk-metadata-update-component',
@@ -27,8 +29,9 @@ import {ProgressSpinner} from 'primeng/progressspinner';
     DatePicker,
     Checkbox,
     ProgressSpinner,
-    AutoComplete
-],
+    AutoComplete,
+    Select
+  ],
   providers: [MessageService],
   templateUrl: './bulk-metadata-update-component.html',
   styleUrl: './bulk-metadata-update-component.scss'
@@ -63,7 +66,10 @@ export class BulkMetadataUpdateComponent implements OnInit {
   private readonly bookMetadataManageService = inject(BookMetadataManageService);
   private readonly messageService = inject(MessageService);
   private readonly injector = inject(Injector);
+  private readonly languageService = inject(LanguageService);
   private readonly uniqueMetadata = computed(() => this.bookService.uniqueMetadata());
+
+  languageOptions: LanguageOption[] = [];
 
   get allAuthors(): string[] { return this.uniqueMetadata().authors; }
   get allGenres(): string[] { return this.uniqueMetadata().categories; }
@@ -123,6 +129,7 @@ export class BulkMetadataUpdateComponent implements OnInit {
   ngOnInit(): void {
     this.bookIds = this.config.data?.bookIds ?? [];
     this.books = this.bookService.getBooksByIds(this.bookIds);
+    this.languageService.getLanguages().subscribe(langs => this.languageOptions = langs);
 
     this.metadataForm = this.fb.group({
       authors: [],

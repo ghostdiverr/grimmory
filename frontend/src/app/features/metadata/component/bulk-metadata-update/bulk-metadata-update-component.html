@@ -96,7 +96,14 @@
               <label for="clearLanguage" class="clear-label">Clear</label>
             </div>
           </label>
-          <input pInputText id="language" formControlName="language" [disabled]="clearFields.language" class="full-width"/>
+          <p-select id="language" formControlName="language"
+                    [options]="languageOptions"
+                    optionLabel="name" optionValue="code"
+                    [filter]="true" filterBy="name,code"
+                    [showClear]="true"
+                    [disabled]="clearFields.language"
+                    appendTo="body"
+                    styleClass="full-width"/>
         </div>
       </div>
 

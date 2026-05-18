@@ -206,8 +206,8 @@
                           [options]="languageOptions"
                           optionLabel="name" optionValue="code"
                           [filter]="true" filterBy="name,code"
-                          [editable]="true"
                           [showClear]="true"
+                          appendTo="body"
                           [placeholder]="t('languagePlaceholder')"/>
                 @if (!book.metadata!['languageLocked']) {
                   <p-button icon="pi pi-lock-open" [outlined]="true" (onClick)="toggleLock('language')" severity="success"></p-button>

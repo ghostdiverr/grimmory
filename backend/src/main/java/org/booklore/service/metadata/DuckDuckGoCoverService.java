@@ -31,6 +31,27 @@ public class DuckDuckGoCoverService implements BookCoverProvider {
     private static final String SEARCH_BASE_URL = "https://duckduckgo.com/?q=";
     private static final String JSON_BASE_URL = "https://duckduckgo.com/i.js?o=json&q=";
     private static final String DEFAULT_COVER_SEARCH_SITES = "amazon.com,goodreads.com";
+
+    private static final Map<String, String[]> LANGUAGE_BOOK_WORDS = Map.ofEntries(
+            Map.entry("fr",  new String[]{"livre", "livre audio"}),
+            Map.entry("fre", new String[]{"livre", "livre audio"}),
+            Map.entry("fra", new String[]{"livre", "livre audio"}),
+            Map.entry("de",  new String[]{"Buch", "Hörbuch"}),
+            Map.entry("ger", new String[]{"Buch", "Hörbuch"}),
+            Map.entry("deu", new String[]{"Buch", "Hörbuch"}),
+            Map.entry("es",  new String[]{"libro", "audiolibro"}),
+            Map.entry("spa", new String[]{"libro", "audiolibro"}),
+            Map.entry("it",  new String[]{"libro", "audiolibro"}),
+            Map.entry("ita", new String[]{"libro", "audiolibro"}),
+            Map.entry("pt",  new String[]{"livro", "audiolivro"}),
+            Map.entry("por", new String[]{"livro", "audiolivro"}),
+            Map.entry("nl",  new String[]{"boek", "luisterboek"}),
+            Map.entry("nld", new String[]{"boek", "luisterboek"}),
+            Map.entry("ja",  new String[]{"本", "オーディオブック"}),
+            Map.entry("jpn", new String[]{"本", "オーディオブック"}),
+            Map.entry("zh",  new String[]{"书", "有声书"}),
+            Map.entry("zho", new String[]{"书", "有声书"})
+    );
     private static final String SEARCH_PARAMS_TALL = "&iar=images&iaf=size%3ALarge%2Clayout%3ATall";
     private static final String JSON_PARAMS_TALL = "&iar=images&iaf=size%3ALarge%2Clayout%3ATall";
     private static final String SEARCH_PARAMS_SQUARE = "&iar=images&iaf=size%3ALarge%2Clayout%3ASquare";
@@ -73,23 +94,27 @@ public class DuckDuckGoCoverService implements BookCoverProvider {
                 String title = request.getTitle();
                 String author = request.getAuthor();
                 boolean isAudiobook = "audiobook".equalsIgnoreCase(request.getCoverType());
-                String bookType = isAudiobook ? "audiobook" : "book";
+                String bookType = resolveBookWord(request.getLanguage(), isAudiobook);
                 String searchTerm = (author != null && !author.isEmpty())
                         ? title + " " + author + " " + bookType
                         : title + " " + bookType;
+                log.debug("DDG cover search language=\"{}\", bookType=\"{}\"", request.getLanguage(), bookType);
 
                 String searchParams = isAudiobook ? SEARCH_PARAMS_SQUARE : SEARCH_PARAMS_TALL;
                 String jsonParams = isAudiobook ? JSON_PARAMS_SQUARE : JSON_PARAMS_TALL;
 
-                String siteFilter = buildSiteFilter(appSettingService.getAppSettings().getCoverSearchSites());
+                String rawSites = appSettingService.getAppSettings().getCoverSearchSites();
+                String siteFilter = buildSiteFilter(rawSites);
+                log.debug("DDG cover search: term=\"{}\", configuredSites=\"{}\", siteFilter=\"{}\"", searchTerm, rawSites, siteFilter);
 
                 AtomicInteger index = new AtomicInteger(1);
                 Set<String> emittedUrls = new HashSet<>();
 
                 // 1. Site-filtered search
                 String encodedSiteQuery = URLEncoder.encode(searchTerm, StandardCharsets.UTF_8);
-                String encodedSiteFilter = URLEncoder.encode(siteFilter, StandardCharsets.UTF_8).replace("%20", "+");
-                String siteUrl = SEARCH_BASE_URL + encodedSiteQuery + "+" + encodedSiteFilter + searchParams;
+                String rawSiteFilter = "+" + siteFilter.replace(" ", "+").replace(":", "%3A");
+                String siteUrl = SEARCH_BASE_URL + encodedSiteQuery + rawSiteFilter + searchParams;
+                log.debug("DDG phase-1 HTML url: {}", siteUrl);
                 Connection.Response siteResponse = getResponse(siteUrl);
                 Document siteDoc = parseResponse(siteResponse);
                 Map<String, String> cookies = siteResponse.cookies();
@@ -98,23 +123,29 @@ public class DuckDuckGoCoverService implements BookCoverProvider {
 
                 if (siteMatcher.find()) {
                     String siteSearchToken = siteMatcher.group(1);
-                    List<CoverImage> siteFilteredImages = fetchImagesFromApi(searchTerm + " " + siteFilter, siteSearchToken, cookies, siteUrl, jsonParams);
-                    siteFilteredImages.removeIf(dto -> dto.getWidth() < 350);
+                    String phase1Query = searchTerm + " " + siteFilter;
+                    log.debug("DDG phase-1 token found, API query: \"{}\"", phase1Query);
+                    List<CoverImage> siteFilteredImages = fetchImagesFromApi(phase1Query, siteSearchToken, cookies, siteUrl, jsonParams);
+                    log.debug("DDG phase-1 raw results: {}", siteFilteredImages.stream().map(i -> i.getWidth() + "x" + i.getHeight() + " " + extractDomain(i.getUrl())).toList());
+                    // Phase 1 comes from trusted sites — lower the size bar and skip aspect ratio check
+                    siteFilteredImages.removeIf(dto -> dto.getWidth() < 150 || dto.getHeight() < 150);
                     if (isAudiobook) {
                         siteFilteredImages.removeIf(dto -> !isApproximatelySquare(dto.getWidth(), dto.getHeight()));
-                    } else {
-                        siteFilteredImages.removeIf(dto -> dto.getWidth() >= dto.getHeight());
                     }
+                    log.debug("DDG phase-1 after filters: {} results", siteFilteredImages.size());
 
                     int count = 0;
                     for (CoverImage img : siteFilteredImages) {
                         if (sink.isCancelled()) return;
                         if (count >= 7) break;
+                        log.debug("DDG phase-1 emitting: {}", img.getUrl());
                         CoverImage indexedImg = new CoverImage(img.getUrl(), img.getWidth(), img.getHeight(), index.getAndIncrement());
                         sink.next(indexedImg);
                         emittedUrls.add(img.getUrl());
                         count++;
                     }
+                } else {
+                    log.warn("DDG phase-1: no VQD token found in HTML response");
                 }
 
                 if (sink.isCancelled()) return;
@@ -122,6 +153,7 @@ public class DuckDuckGoCoverService implements BookCoverProvider {
                 // 2. General search
                 String encodedGeneralQuery = URLEncoder.encode(searchTerm, StandardCharsets.UTF_8);
                 String generalUrl = SEARCH_BASE_URL + encodedGeneralQuery + searchParams;
+                log.debug("DDG phase-2 HTML url: {}", generalUrl);
                 Connection.Response generalResponse = getResponse(generalUrl);
                 Document generalDoc = parseResponse(generalResponse);
                 Map<String, String> generalCookies = generalResponse.cookies();
@@ -130,6 +162,7 @@ public class DuckDuckGoCoverService implements BookCoverProvider {
                 if (generalMatcher.find()) {
                     String generalSearchToken = generalMatcher.group(1);
                     List<CoverImage> generalBookImages = fetchImagesFromApi(searchTerm, generalSearchToken, generalCookies, generalUrl, jsonParams);
+                    log.debug("DDG phase-2 raw results: {}", generalBookImages.stream().map(i -> extractDomain(i.getUrl())).toList());
                     generalBookImages.removeIf(dto -> dto.getWidth() < 350);
                     if (isAudiobook) {
                         generalBookImages.removeIf(dto -> !isApproximatelySquare(dto.getWidth(), dto.getHeight()));
@@ -143,11 +176,14 @@ public class DuckDuckGoCoverService implements BookCoverProvider {
                         if (sink.isCancelled()) return;
                         if (count >= 10) break;
                         if (emittedUrls.contains(img.getUrl())) continue;
+                        log.debug("DDG phase-2 emitting: {}", img.getUrl());
                         CoverImage indexedImg = new CoverImage(img.getUrl(), img.getWidth(), img.getHeight(), index.getAndIncrement());
                         sink.next(indexedImg);
                         emittedUrls.add(img.getUrl());
                         count++;
                     }
+                } else {
+                    log.warn("DDG phase-2: no VQD token found in HTML response");
                 }
 
                 sink.complete();
@@ -240,6 +276,27 @@ public class DuckDuckGoCoverService implements BookCoverProvider {
         return all;
     }
 
+    private String resolveBookWord(String language, boolean isAudiobook) {
+        if (language == null || language.isBlank()) {
+            return isAudiobook ? "audiobook" : "book";
+        }
+        String raw = language.trim().toLowerCase();
+        // Handle "fr-FR", "fr_FR" style tags — take just the primary subtag
+        final String key = (raw.contains("-") || raw.contains("_")) ? raw.split("[-_]")[0] : raw;
+        String[] words = LANGUAGE_BOOK_WORDS.get(key);
+        if (words == null) {
+            words = LANGUAGE_BOOK_WORDS.entrySet().stream()
+                    .filter(e -> key.startsWith(e.getKey()))
+                    .map(Map.Entry::getValue)
+                    .findFirst()
+                    .orElse(null);
+        }
+        if (words == null) {
+            return isAudiobook ? "audiobook" : "book";
+        }
+        return isAudiobook ? words[1] : words[0];
+    }
+
     private String buildSiteFilter(String coverSearchSites) {
         List<String> sites = parseSites(coverSearchSites);
         if (sites.isEmpty()) {
@@ -289,5 +346,14 @@ public class DuckDuckGoCoverService implements BookCoverProvider {
         if (width == 0 || height == 0) return false;
         double ratio = (double) width / height;
         return ratio >= 0.85 && ratio <= 1.15;
+    }
+
+    private String extractDomain(String url) {
+        try {
+            java.net.URI uri = java.net.URI.create(url);
+            return uri.getHost();
+        } catch (Exception e) {
+            return url;
+        }
     }
 }

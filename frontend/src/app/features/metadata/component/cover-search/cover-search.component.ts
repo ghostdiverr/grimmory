@@ -35,6 +35,7 @@ export class CoverSearchComponent implements OnInit {
   loading = signal(false);
   hasSearched = signal(false);
   coverType: 'ebook' | 'audiobook' = 'ebook';
+  bookLanguage?: string;
 
   private fb = inject(FormBuilder);
   private bookCoverService = inject(BookCoverService);
@@ -66,6 +67,7 @@ export class CoverSearchComponent implements OnInit {
     }
 
     if (book) {
+      this.bookLanguage = book.metadata?.language;
       this.searchForm.patchValue({
         title: book.metadata?.title || '',
         author: book.metadata?.authors && book.metadata?.authors.length > 0 ? book.metadata?.authors[0] : ''
@@ -85,7 +87,8 @@ export class CoverSearchComponent implements OnInit {
         bookId: this.bookId,
         title: this.searchForm.value.title,
         author: this.searchForm.value.author,
-        coverType: this.coverType
+        coverType: this.coverType,
+        language: this.bookLanguage
       };
 
       this.bookCoverService.fetchBookCovers(request)

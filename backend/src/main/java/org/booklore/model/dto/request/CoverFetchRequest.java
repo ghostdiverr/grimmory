@@ -14,4 +14,5 @@ public class CoverFetchRequest {
     private String title;
     private String author;
     private String coverType; // "ebook" or "audiobook"
+    private String language;
 }

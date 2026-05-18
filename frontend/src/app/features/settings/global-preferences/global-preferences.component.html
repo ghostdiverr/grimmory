@@ -109,6 +109,25 @@
             </p>
           </div>
         </div>
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-label-row">
+              <span class="setting-label">{{ t('covers.searchSites') }}</span>
+              <div class="input-group">
+                <input
+                  type="text"
+                  pInputText
+                  [(ngModel)]="coverSearchSites"
+                  [placeholder]="t('covers.searchSitesPlaceholder')"/>
+                <p-button [label]="'common.save' | transloco" outlined severity="success" (onClick)="saveCoverSearchSites()"></p-button>
+              </div>
+            </div>
+            <p class="setting-description">
+              <i class="pi pi-info-circle"></i>
+              {{ t('covers.searchSitesDesc') }}
+            </p>
+          </div>
+        </div>
       </div>
     </div>
 

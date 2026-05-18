@@ -63,6 +63,7 @@ function buildAppSettings(overrides: Partial<AppSettings> = {}): AppSettings {
     coverCroppingSettings: {} as never,
     metadataDownloadOnBookdrop: false,
     metadataProviderSpecificFields: {} as never,
+    coverSearchSites: 'amazon.com,goodreads.com',
     oidcSessionDurationHours: null,
     oidcGroupSyncMode: null,
     oidcForceOnlyMode: publicSettings.oidcForceOnlyMode,

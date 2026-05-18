@@ -17,7 +17,10 @@
     "aspectRatio": "Aspect Ratio Threshold: {{value}}",
     "aspectRatioDesc": "Images with aspect ratios exceeding this threshold will be cropped. A value of 2.5 means images more than 2.5x taller (or wider) than normal will be cropped.",
     "smartCropping": "Smart Cropping",
-    "smartCroppingDesc": "Skip uniform colour regions when determining where to crop. Focuses the cover image on the most relevant content."
+    "smartCroppingDesc": "Skip uniform colour regions when determining where to crop. Focuses the cover image on the most relevant content.",
+    "searchSites": "Cover Search Sites",
+    "searchSitesPlaceholder": "amazon.com,goodreads.com",
+    "searchSitesDesc": "Comma-separated list of sites used when searching for covers via DuckDuckGo. Use locale-specific sites (e.g. amazon.fr,fnac.com) to get covers in the right language."
   },
   "search": {
     "sectionTitle": "Search & Recommendations",

@@ -195,6 +195,7 @@ export interface AppSettings {
   coverCroppingSettings: CoverCroppingSettings;
   metadataDownloadOnBookdrop: boolean;
   metadataProviderSpecificFields: MetadataProviderSpecificFields;
+  coverSearchSites: string;
   oidcSessionDurationHours: number | null;
   oidcGroupSyncMode: string | null;
   oidcForceOnlyMode: boolean;
@@ -244,6 +245,7 @@ export enum AppSettingKey {
   METADATA_PUBLIC_REVIEWS_SETTINGS = 'METADATA_PUBLIC_REVIEWS_SETTINGS',
   KOBO_SETTINGS = 'KOBO_SETTINGS',
   COVER_CROPPING_SETTINGS = 'COVER_CROPPING_SETTINGS',
+  COVER_SEARCH_SITES = 'COVER_SEARCH_SITES',
   METADATA_PROVIDER_SPECIFIC_FIELDS = 'METADATA_PROVIDER_SPECIFIC_FIELDS',
   OIDC_SESSION_DURATION_HOURS = 'OIDC_SESSION_DURATION_HOURS',
   OIDC_GROUP_SYNC_MODE = 'OIDC_GROUP_SYNC_MODE',

@@ -61,11 +61,13 @@ export class GlobalPreferencesComponent implements OnInit {
     if (settings.coverCroppingSettings) {
       this.coverCroppingSettings = {...settings.coverCroppingSettings};
     }
+    this.coverSearchSites = settings.coverSearchSites ?? 'amazon.com,goodreads.com';
     this.toggles.autoBookSearch = settings.autoBookSearch ?? false;
     this.toggles.similarBookRecommendation = settings.similarBookRecommendation ?? false;
   });
 
   maxFileUploadSizeInMb?: number;
+  coverSearchSites = 'amazon.com,goodreads.com';
   regenerateCoverMenuItems: MenuItem[] = [];
 
   ngOnInit(): void {
@@ -94,6 +96,10 @@ export class GlobalPreferencesComponent implements OnInit {
 
   onCoverCroppingChange(): void {
     this.saveSetting(AppSettingKey.COVER_CROPPING_SETTINGS, this.coverCroppingSettings);
+  }
+
+  saveCoverSearchSites(): void {
+    this.saveSetting(AppSettingKey.COVER_SEARCH_SITES, this.coverSearchSites.trim());
   }
 
   saveFileSize() {

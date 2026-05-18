@@ -229,6 +229,7 @@ public class AppSettingService {
                 true
             )
         );
+        builder.coverSearchSites(settingPersistenceHelper.getOrCreateSetting(AppSettingKey.COVER_SEARCH_SITES, "amazon.com,goodreads.com"));
         builder.autoBookSearch(Boolean.parseBoolean(settingPersistenceHelper.getOrCreateSetting(AppSettingKey.AUTO_BOOK_SEARCH, "false")));
         builder.uploadPattern(settingPersistenceHelper.getOrCreateSetting(AppSettingKey.UPLOAD_FILE_PATTERN, "{authors}/<{series}/><{seriesIndex}. >/{title}/{title}< - {authors}>< ({year})>"));
         builder.similarBookRecommendation(Boolean.parseBoolean(settingPersistenceHelper.getOrCreateSetting(AppSettingKey.SIMILAR_BOOK_RECOMMENDATION, "true")));

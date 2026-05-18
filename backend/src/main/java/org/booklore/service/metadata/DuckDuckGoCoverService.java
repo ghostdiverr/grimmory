@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.booklore.exception.ApiError;
 import org.booklore.model.dto.CoverImage;
 import org.booklore.model.dto.request.CoverFetchRequest;
+import org.booklore.service.appsettings.AppSettingService;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -29,7 +30,7 @@ public class DuckDuckGoCoverService implements BookCoverProvider {
 
     private static final String SEARCH_BASE_URL = "https://duckduckgo.com/?q=";
     private static final String JSON_BASE_URL = "https://duckduckgo.com/i.js?o=json&q=";
-    private static final String SITE_FILTER = "+(site%3Aamazon.com+OR+site%3Agoodreads.com)";
+    private static final String DEFAULT_COVER_SEARCH_SITES = "amazon.com,goodreads.com";
     private static final String SEARCH_PARAMS_TALL = "&iar=images&iaf=size%3ALarge%2Clayout%3ATall";
     private static final String JSON_PARAMS_TALL = "&iar=images&iaf=size%3ALarge%2Clayout%3ATall";
     private static final String SEARCH_PARAMS_SQUARE = "&iar=images&iaf=size%3ALarge%2Clayout%3ASquare";
@@ -64,6 +65,7 @@ public class DuckDuckGoCoverService implements BookCoverProvider {
     );
 
     private final ObjectMapper mapper;
+    private final AppSettingService appSettingService;
 
     public Flux<CoverImage> getCovers(CoverFetchRequest request) {
         return Flux.create(sink -> {
@@ -79,12 +81,15 @@ public class DuckDuckGoCoverService implements BookCoverProvider {
                 String searchParams = isAudiobook ? SEARCH_PARAMS_SQUARE : SEARCH_PARAMS_TALL;
                 String jsonParams = isAudiobook ? JSON_PARAMS_SQUARE : JSON_PARAMS_TALL;
 
+                String siteFilter = buildSiteFilter(appSettingService.getAppSettings().getCoverSearchSites());
+
                 AtomicInteger index = new AtomicInteger(1);
                 Set<String> emittedUrls = new HashSet<>();
 
                 // 1. Site-filtered search
                 String encodedSiteQuery = URLEncoder.encode(searchTerm, StandardCharsets.UTF_8);
-                String siteUrl = SEARCH_BASE_URL + encodedSiteQuery + SITE_FILTER + searchParams;
+                String encodedSiteFilter = URLEncoder.encode(siteFilter, StandardCharsets.UTF_8).replace("%20", "+");
+                String siteUrl = SEARCH_BASE_URL + encodedSiteQuery + "+" + encodedSiteFilter + searchParams;
                 Connection.Response siteResponse = getResponse(siteUrl);
                 Document siteDoc = parseResponse(siteResponse);
                 Map<String, String> cookies = siteResponse.cookies();
@@ -93,7 +98,7 @@ public class DuckDuckGoCoverService implements BookCoverProvider {
 
                 if (siteMatcher.find()) {
                     String siteSearchToken = siteMatcher.group(1);
-                    List<CoverImage> siteFilteredImages = fetchImagesFromApi(searchTerm + " (site:amazon.com OR site:goodreads.com)", siteSearchToken, cookies, siteUrl, jsonParams);
+                    List<CoverImage> siteFilteredImages = fetchImagesFromApi(searchTerm + " " + siteFilter, siteSearchToken, cookies, siteUrl, jsonParams);
                     siteFilteredImages.removeIf(dto -> dto.getWidth() < 350);
                     if (isAudiobook) {
                         siteFilteredImages.removeIf(dto -> !isApproximatelySquare(dto.getWidth(), dto.getHeight()));
@@ -191,6 +196,7 @@ public class DuckDuckGoCoverService implements BookCoverProvider {
     }
 
     private List<CoverImage> fetchImagesFromApi(String query, String searchToken, Map<String, String> cookies, String referrerUrl, String jsonParams) {
+        List<String> configuredSites = parseSites(appSettingService.getAppSettings().getCoverSearchSites());
         List<CoverImage> priority = new ArrayList<>();
         List<CoverImage> others = new ArrayList<>();
         try {
@@ -217,7 +223,8 @@ public class DuckDuckGoCoverService implements BookCoverProvider {
                     int w = img.path("width").asInt();
                     int h = img.path("height").asInt();
                     CoverImage dto = new CoverImage(link, w, h, 0);
-                    if (link.contains("amazon") || link.contains("goodreads")) {
+                    boolean isPriority = configuredSites.stream().anyMatch(link::contains);
+                    if (isPriority) {
                         priority.add(dto);
                     } else {
                         others.add(dto);
@@ -231,6 +238,28 @@ public class DuckDuckGoCoverService implements BookCoverProvider {
         List<CoverImage> all = new ArrayList<>(priority);
         all.addAll(others);
         return all;
+    }
+
+    private String buildSiteFilter(String coverSearchSites) {
+        List<String> sites = parseSites(coverSearchSites);
+        if (sites.isEmpty()) {
+            sites = parseSites(DEFAULT_COVER_SEARCH_SITES);
+        }
+        String joined = sites.stream()
+                .map(s -> "site:" + s)
+                .reduce((a, b) -> a + " OR " + b)
+                .orElse("");
+        return "(" + joined + ")";
+    }
+
+    private List<String> parseSites(String coverSearchSites) {
+        if (coverSearchSites == null || coverSearchSites.isBlank()) {
+            return List.of();
+        }
+        return Arrays.stream(coverSearchSites.split(","))
+                .map(String::trim)
+                .filter(s -> !s.isBlank())
+                .toList();
     }
 
     private Connection.Response getResponse(String url) {

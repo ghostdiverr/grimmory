@@ -35,6 +35,7 @@ public enum AppSettingKey {
 
     // ADMIN + MANAGE_GLOBAL_PREFERENCES
     COVER_CROPPING_SETTINGS             ("cover_cropping_settings",              true,  false, List.of(PermissionType.ADMIN, PermissionType.MANAGE_GLOBAL_PREFERENCES)),
+    COVER_SEARCH_SITES                  ("cover_search_sites",                   false, false, List.of(PermissionType.ADMIN, PermissionType.MANAGE_GLOBAL_PREFERENCES)),
     AUTO_BOOK_SEARCH                    ("auto_book_search",                     false, false, List.of(PermissionType.ADMIN, PermissionType.MANAGE_GLOBAL_PREFERENCES)),
     SIMILAR_BOOK_RECOMMENDATION         ("similar_book_recommendation",          false, false, List.of(PermissionType.ADMIN, PermissionType.MANAGE_GLOBAL_PREFERENCES)),
     PDF_CACHE_SIZE_IN_MB                ("pdf_cache_size_in_mb",                 false, false, List.of(PermissionType.ADMIN, PermissionType.MANAGE_GLOBAL_PREFERENCES)),

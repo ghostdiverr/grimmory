@@ -632,9 +632,11 @@ export class MetadataManagerComponent implements OnInit, OnDestroy {
 
   normalizeAllLanguages(): void {
     this.normalizing.set(true);
+    this.loading.set(true);
     this.bookMetadataManageService.normalizeLanguages().subscribe({
       next: () => {
         this.normalizing.set(false);
+        this.loading.set(false);
         this.messageService.add({
           severity: 'success',
           summary: this.t.translate('metadata.manager.toast.normalizeSuccessSummary'),
@@ -643,6 +645,7 @@ export class MetadataManagerComponent implements OnInit, OnDestroy {
       },
       error: () => {
         this.normalizing.set(false);
+        this.loading.set(false);
         this.messageService.add({
           severity: 'error',
           summary: this.t.translate('metadata.manager.toast.normalizeErrorSummary'),

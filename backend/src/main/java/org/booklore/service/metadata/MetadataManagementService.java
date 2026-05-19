@@ -291,13 +291,14 @@ public class MetadataManagementService {
         boolean moveFile = settings.isMoveFilesToLibraryPattern();
 
         List<BookMetadataEntity> books = bookMetadataRepository.findAllByLanguageNotNull();
-        List<BookMetadataEntity> changed = books.stream()
-                .filter(metadata -> {
-                    String normalized = LanguageNormalizer.normalize(metadata.getLanguage());
-                    return normalized != null && !normalized.equals(metadata.getLanguage());
-                })
-                .peek(metadata -> metadata.setLanguage(LanguageNormalizer.normalize(metadata.getLanguage())))
-                .toList();
+        List<BookMetadataEntity> changed = new java.util.ArrayList<>();
+        for (BookMetadataEntity metadata : books) {
+            String normalized = LanguageNormalizer.normalize(metadata.getLanguage());
+            if (normalized != null && !normalized.equals(metadata.getLanguage())) {
+                metadata.setLanguage(normalized);
+                changed.add(metadata);
+            }
+        }
 
         if (!changed.isEmpty()) {
             bookMetadataRepository.saveAll(changed);

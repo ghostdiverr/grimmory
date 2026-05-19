@@ -3,8 +3,10 @@ package org.booklore.util;
 import com.neovisionaries.i18n.LanguageAlpha3Code;
 import com.neovisionaries.i18n.LanguageCode;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 public class LanguageNormalizer {
@@ -17,7 +19,7 @@ public class LanguageNormalizer {
         }
         String trimmed = input.trim();
 
-        // Handle BCP 47 / IETF tags ("fr-FR", "fr_FR") — take the primary subtag
+        // BCP 47 / IETF tags ("fr-FR", "fr_FR") — take primary subtag first
         String primary = trimmed;
         if (trimmed.contains("-") || trimmed.contains("_")) {
             primary = trimmed.split("[-_]")[0];
@@ -32,49 +34,46 @@ public class LanguageNormalizer {
     }
 
     private static String resolveCode(String input) {
-        // ISO 639-1 (case-insensitive): "fr", "FR"
         LanguageCode byCode = LanguageCode.getByCode(input, false);
-        if (byCode != null) {
-            return byCode.name();
-        }
+        if (byCode != null) return byCode.name();
 
-        // ISO 639-2 alpha-3 (case-insensitive): "fre", "fra", "eng"
         LanguageAlpha3Code byAlpha3 = LanguageAlpha3Code.getByCode(input, false);
         if (byAlpha3 != null) {
             LanguageCode alpha2 = byAlpha3.getAlpha2();
-            if (alpha2 != null) {
-                return alpha2.name();
-            }
+            if (alpha2 != null) return alpha2.name();
         }
 
-        // English name match (case-insensitive): "French", "German", etc.
         List<LanguageCode> byName = LanguageCode.findByName("(?i)" + Pattern.quote(input));
-        if (!byName.isEmpty()) {
-            return byName.get(0).name();
-        }
+        if (!byName.isEmpty()) return byName.get(0).name();
 
-        // Native / localized name via JDK CLDR: "français"→fr, "espagnol"→es, "anglais"→en, etc.
-        return resolveByLocaleDisplayName(input);
+        return LOCALIZED_NAME_MAP.get(input.toLowerCase(Locale.ROOT).trim());
     }
 
-    private static final Locale[] DISPLAY_LOCALES = {
-        Locale.FRENCH, Locale.GERMAN, Locale.ITALIAN,
-        new Locale("es"), new Locale("pt"), new Locale("nl"),
-        new Locale("ru"), new Locale("pl"), new Locale("ja")
-    };
+    /**
+     * Static map built once from JDK CLDR data.
+     * Covers localized language names ("français"→fr, "espagnol"→es, "polski"→pl, etc.)
+     * across the languages most likely to appear as metadata values.
+     */
+    private static final Map<String, String> LOCALIZED_NAME_MAP = buildLocalizedNameMap();
 
-    private static String resolveByLocaleDisplayName(String input) {
-        String inputLower = input.toLowerCase(Locale.ROOT).trim();
+    private static Map<String, String> buildLocalizedNameMap() {
+        Locale[] displayLocales = {
+            Locale.FRENCH, Locale.GERMAN, Locale.ITALIAN,
+            new Locale("es"), new Locale("pt"), new Locale("nl"),
+            new Locale("ru"), new Locale("pl"), new Locale("ja")
+        };
+        Map<String, String> map = new HashMap<>();
         for (LanguageCode code : LanguageCode.values()) {
             if (code == LanguageCode.undefined) continue;
             Locale locale = new Locale(code.name());
-            for (Locale displayLocale : DISPLAY_LOCALES) {
+            for (Locale displayLocale : displayLocales) {
                 String displayName = locale.getDisplayLanguage(displayLocale).toLowerCase(Locale.ROOT);
-                if (displayName.equals(inputLower) && displayName.length() > 2) {
-                    return code.name();
+                // skip trivial cases where the display name is the ISO code itself
+                if (displayName.length() > 2) {
+                    map.putIfAbsent(displayName, code.name());
                 }
             }
         }
-        return null;
+        return Map.copyOf(map);
     }
 }

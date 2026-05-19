@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -291,7 +292,7 @@ public class MetadataManagementService {
         boolean moveFile = settings.isMoveFilesToLibraryPattern();
 
         List<BookMetadataEntity> books = bookMetadataRepository.findAllByLanguageNotNull();
-        List<BookMetadataEntity> changed = new java.util.ArrayList<>();
+        List<BookMetadataEntity> changed = new ArrayList<>();
         for (BookMetadataEntity metadata : books) {
             String normalized = LanguageNormalizer.normalize(metadata.getLanguage());
             if (normalized != null && !normalized.equals(metadata.getLanguage())) {

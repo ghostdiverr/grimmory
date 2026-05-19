@@ -15,6 +15,7 @@ import {AppSettingsService} from '../../../../../shared/service/app-settings.ser
 import {UrlHelperService} from '../../../../../shared/service/url-helper.service';
 import {MetadataFormBuilder} from '../../../../../shared/metadata';
 import {MetadataUtilsService} from '../../../../../shared/metadata/metadata-utils.service';
+import {LanguageService} from '../../../../../shared/services/language.service';
 import {MetadataPickerComponent} from './metadata-picker.component';
 
 describe('MetadataPickerComponent', () => {
@@ -32,6 +33,7 @@ describe('MetadataPickerComponent', () => {
   const supportsDualCovers = vi.fn(() => true);
   const messageAdd = vi.fn();
   const translate = vi.fn((key: string, params?: Record<string, unknown>) => params?.['field'] ? `${key}:${params['field']}` : key);
+  const getLanguages = vi.fn(() => of([]));
   const getThumbnailUrl = vi.fn((bookId: number, updatedOn?: string) => `thumb:${bookId}:${updatedOn ?? 'none'}`);
   const getCoverUrl = vi.fn((bookId: number, updatedOn?: string) => `cover:${bookId}:${updatedOn ?? 'none'}`);
   const getAudiobookCoverUrl = vi.fn((bookId: number, updatedOn?: string) => `audio-cover:${bookId}:${updatedOn ?? 'none'}`);
@@ -83,6 +85,8 @@ describe('MetadataPickerComponent', () => {
     supportsDualCovers.mockClear();
     messageAdd.mockClear();
     translate.mockClear();
+    getLanguages.mockClear();
+    getLanguages.mockReturnValue(of([]));
     getThumbnailUrl.mockClear();
     getCoverUrl.mockClear();
     getAudiobookCoverUrl.mockClear();
@@ -103,6 +107,7 @@ describe('MetadataPickerComponent', () => {
         },
         {provide: MessageService, useValue: {add: messageAdd}},
         {provide: TranslocoService, useValue: {translate}},
+        {provide: LanguageService, useValue: {getLanguages}},
       ]
     });
   });

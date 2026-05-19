@@ -1,4 +1,4 @@
-import {signal} from '@angular/core';
+import {ChangeDetectorRef, signal} from '@angular/core';
 import {TestBed} from '@angular/core/testing';
 import {BehaviorSubject, of, throwError} from 'rxjs';
 import {beforeEach, describe, expect, it, vi} from 'vitest';
@@ -51,6 +51,7 @@ describe('MetadataManagerComponent', () => {
         {provide: ActivatedRoute, useValue: {queryParams: queryParams$}},
         {provide: Router, useValue: {navigate}},
         {provide: LanguageService, useValue: {getLanguages}},
+        {provide: ChangeDetectorRef, useValue: {detectChanges: vi.fn()}},
       ]
     });
   });

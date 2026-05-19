@@ -6,6 +6,7 @@ import org.booklore.model.dto.settings.MetadataPersistenceSettings;
 import org.booklore.model.entity.*;
 import org.booklore.model.enums.BookFileType;
 import org.booklore.model.enums.MergeMetadataType;
+import org.booklore.util.LanguageNormalizer;
 import org.booklore.repository.*;
 import org.booklore.service.appsettings.AppSettingService;
 import org.booklore.service.file.FileFingerprint;
@@ -282,6 +283,27 @@ public class MetadataManagementService {
         }
 
         log.info("Consolidated {} publishers into '{}': {}", valuesToMerge.size(), targetPublisher, valuesToMerge);
+    }
+
+    @Transactional
+    public void normalizeAllLanguages() {
+        MetadataPersistenceSettings settings = appSettingService.getAppSettings().getMetadataPersistenceSettings();
+        boolean moveFile = settings.isMoveFilesToLibraryPattern();
+
+        List<BookMetadataEntity> books = bookMetadataRepository.findAllByLanguageNotNull();
+        List<BookMetadataEntity> changed = books.stream()
+                .filter(metadata -> {
+                    String normalized = LanguageNormalizer.normalize(metadata.getLanguage());
+                    return normalized != null && !normalized.equals(metadata.getLanguage());
+                })
+                .peek(metadata -> metadata.setLanguage(LanguageNormalizer.normalize(metadata.getLanguage())))
+                .toList();
+
+        if (!changed.isEmpty()) {
+            bookMetadataRepository.saveAll(changed);
+            writeMetadataToFile(changed, moveFile);
+            log.info("Normalized {} book language values", changed.size());
+        }
     }
 
     private void consolidateLanguages(List<String> targetValues, List<String> valuesToMerge, boolean moveFile) {

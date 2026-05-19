@@ -4,6 +4,7 @@ import com.neovisionaries.i18n.LanguageAlpha3Code;
 import com.neovisionaries.i18n.LanguageCode;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.regex.Pattern;
 
 public class LanguageNormalizer {
@@ -52,6 +53,28 @@ public class LanguageNormalizer {
             return byName.get(0).name();
         }
 
+        // Native / localized name via JDK CLDR: "français"→fr, "espagnol"→es, "anglais"→en, etc.
+        return resolveByLocaleDisplayName(input);
+    }
+
+    private static final Locale[] DISPLAY_LOCALES = {
+        Locale.FRENCH, Locale.GERMAN, Locale.ITALIAN,
+        new Locale("es"), new Locale("pt"), new Locale("nl"),
+        new Locale("ru"), new Locale("pl"), new Locale("ja")
+    };
+
+    private static String resolveByLocaleDisplayName(String input) {
+        String inputLower = input.toLowerCase(Locale.ROOT).trim();
+        for (LanguageCode code : LanguageCode.values()) {
+            if (code == LanguageCode.undefined) continue;
+            Locale locale = new Locale(code.name());
+            for (Locale displayLocale : DISPLAY_LOCALES) {
+                String displayName = locale.getDisplayLanguage(displayLocale).toLowerCase(Locale.ROOT);
+                if (displayName.equals(inputLower) && displayName.length() > 2) {
+                    return code.name();
+                }
+            }
+        }
         return null;
     }
 }

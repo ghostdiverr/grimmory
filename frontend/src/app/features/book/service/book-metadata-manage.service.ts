@@ -102,6 +102,12 @@ export class BookMetadataManageService {
     );
   }
 
+  normalizeLanguages(): Observable<unknown> {
+    return this.http.post(`${this.url}/metadata/manage/normalize-languages`, {}).pipe(
+      tap(() => invalidateBooksQuery(this.queryClient))
+    );
+  }
+
   deleteMetadata(metadataType: 'authors' | 'categories' | 'moods' | 'tags' | 'series' | 'publishers' | 'languages', valuesToDelete: string[]): Observable<unknown> {
     return this.http.post(`${this.url}/metadata/manage/delete`, {metadataType, valuesToDelete}).pipe(
       tap(() => {

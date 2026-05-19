@@ -10,7 +10,7 @@ import {Book} from '../../../book/model/book.model';
 import {BookMetadataManageService} from '../../../book/service/book-metadata-manage.service';
 import {BookService} from '../../../book/service/book.service';
 import {PageTitleService} from '../../../../shared/service/page-title.service';
-import {LanguageService} from '../../../../shared/services/language.service';
+import {LanguageOption, LanguageService} from '../../../../shared/services/language.service';
 import {MetadataManagerComponent} from './metadata-manager.component';
 
 describe('MetadataManagerComponent', () => {
@@ -23,7 +23,7 @@ describe('MetadataManagerComponent', () => {
   const consolidateMetadata = vi.fn(() => of(void 0));
   const deleteMetadata = vi.fn(() => of(void 0));
   const normalizeLanguages = vi.fn(() => of(void 0));
-  const getLanguages = vi.fn(() => of([]));
+  const getLanguages = vi.fn(() => of([] as LanguageOption[]));
   let queryParams$: BehaviorSubject<Record<string, unknown>>;
 
   beforeEach(() => {

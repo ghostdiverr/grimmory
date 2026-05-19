@@ -137,7 +137,7 @@
                         (keydown.enter)="onMetadataClick(tab.type, item.value)">
                         @if (tab.type === 'languages') {
                           @if (!isNormalizedLanguage(item.value)) {
-                            <i class="pi pi-exclamation-triangle language-warn-icon"
+                            <i class="pi pi-exclamation-triangle info-icon"
                                [pTooltip]="t('languageNotNormalized')"
                                tooltipPosition="top"></i>
                           }

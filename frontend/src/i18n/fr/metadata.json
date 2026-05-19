@@ -470,6 +470,7 @@
     "renameProcessingNote": "Ce processus peut prendre un certain temps si « Écrire dans le fichier » est activé dans les paramètres.",
     "normalizeAll": "Normaliser tout",
     "languageNotNormalized": "Code ISO 639-1 non reconnu — cliquez sur « Normaliser tout » ou renommez manuellement",
+    "languageAlreadyNormalized": "Code ISO 639-1 valide — aucune correction nécessaire",
     "deleteDialogTitle": "Supprimer {{ type }}",
     "deleteWarning": "Vous êtes sur le point de supprimer {{ count }} {{ type }} :",
     "whatWillHappen": "Ce qui va se passer :",

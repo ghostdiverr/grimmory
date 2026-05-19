@@ -163,7 +163,8 @@
                         size="small"
                         [outlined]="true"
                         [rounded]="true"
-                        [pTooltip]="t('renameSplitTooltip')"
+                        [disabled]="tab.type === 'languages' && isNormalizedLanguage(item.value)"
+                        [pTooltip]="tab.type === 'languages' && isNormalizedLanguage(item.value) ? t('languageAlreadyNormalized') : t('renameSplitTooltip')"
                         (onClick)="openRenameDialog(tab.type, item)"></p-button>
                       <p-button
                         icon="pi pi-trash"

@@ -1,4 +1,4 @@
-import {Component, effect, inject, OnDestroy, OnInit, signal} from '@angular/core';
+import {ChangeDetectorRef, Component, effect, inject, OnDestroy, OnInit, signal} from '@angular/core';
 import {Tab, TabList, TabPanel, TabPanels, Tabs} from 'primeng/tabs';
 import {TableModule} from 'primeng/table';
 import {Button} from 'primeng/button';
@@ -75,6 +75,7 @@ export class MetadataManagerComponent implements OnInit, OnDestroy {
   private pageTitle = inject(PageTitleService);
   private readonly t = inject(TranslocoService);
   private readonly languageService = inject(LanguageService);
+  private readonly cdRef = inject(ChangeDetectorRef);
 
   languageOptions: LanguageOption[] = [];
   normalizing = signal(false);
@@ -149,7 +150,10 @@ export class MetadataManagerComponent implements OnInit, OnDestroy {
   ];
 
   ngOnInit() {
-    this.languageService.getLanguages().subscribe(langs => this.languageOptions = langs);
+    this.languageService.getLanguages().subscribe(langs => {
+      this.languageOptions = langs;
+      this.cdRef.detectChanges();
+    });
     this.routeSub = this.route.queryParams.subscribe(params => {
       const tabParam = params['tab'] as MetadataType;
       if (this.validTabs.includes(tabParam)) {

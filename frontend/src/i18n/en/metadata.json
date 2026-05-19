@@ -495,6 +495,7 @@
     "renameProcessingNote": "This process may take some time if \"Write to file\" is enabled in settings.",
     "normalizeAll": "Normalize all",
     "languageNotNormalized": "Not a recognized ISO 639-1 code — click \"Normalize all\" or rename manually",
+    "languageAlreadyNormalized": "Already a valid ISO 639-1 code — no edit needed",
     "deleteDialogTitle": "Delete {{ type }}",
     "deleteWarning": "You are about to delete {{ count }} {{ type }}:",
     "whatWillHappen": "What will happen:",

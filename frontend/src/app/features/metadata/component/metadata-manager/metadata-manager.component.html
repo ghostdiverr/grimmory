@@ -63,6 +63,17 @@
                   severity="success"
                   size="small"
                   outlined></p-button>
+                @if (tab.type === 'languages') {
+                  <p-button
+                    [label]="normalizing() ? t('processing') : t('normalizeAll')"
+                    [icon]="normalizing() ? 'pi pi-spin pi-spinner' : 'pi pi-sync'"
+                    [loading]="normalizing()"
+                    [disabled]="normalizing()"
+                    (onClick)="normalizeAllLanguages()"
+                    severity="warn"
+                    size="small"
+                    outlined></p-button>
+                }
               </div>
             </div>
 
@@ -124,7 +135,16 @@
                         tabindex="0"
                         (click)="onMetadataClick(tab.type, item.value)"
                         (keydown.enter)="onMetadataClick(tab.type, item.value)">
-                        {{ item.value }}
+                        @if (tab.type === 'languages') {
+                          @if (!isNormalizedLanguage(item.value)) {
+                            <i class="pi pi-exclamation-triangle info-icon"
+                               [pTooltip]="t('languageNotNormalized')"
+                               tooltipPosition="top"></i>
+                          }
+                          {{ getLanguageDisplay(item.value) }}
+                        } @else {
+                          {{ item.value }}
+                        }
                       </span>
                     </td>
                     <td>{{ item.count }}</td>
@@ -143,7 +163,8 @@
                         size="small"
                         [outlined]="true"
                         [rounded]="true"
-                        [pTooltip]="t('renameSplitTooltip')"
+                        [disabled]="tab.type === 'languages' && isNormalizedLanguage(item.value)"
+                        [pTooltip]="tab.type === 'languages' && isNormalizedLanguage(item.value) ? t('languageAlreadyNormalized') : t('renameSplitTooltip')"
                         (onClick)="openRenameDialog(tab.type, item)"></p-button>
                       <p-button
                         icon="pi pi-trash"
@@ -182,13 +203,25 @@
 
       <div class="form-field">
         <label for="mergeTarget">{{ isSingleValueField(currentMergeType) ? t('targetValueLabel') : t('targetValuesLabel') }}</label>
-        <input
-          id="mergeTarget"
-          type="text"
-          pInputText
-          [(ngModel)]="mergeTarget"
-          class="full-width-input"
-          [placeholder]="isSingleValueField(currentMergeType) ? t('singleValuePlaceholder') : t('multiValuePlaceholder')"/>
+        @if (currentMergeType === 'languages') {
+          <p-select
+            [(ngModel)]="mergeTarget"
+            [options]="languageOptions"
+            optionLabel="name" optionValue="code"
+            [filter]="true" filterBy="name,code"
+            [showClear]="true"
+            appendTo="body"
+            styleClass="full-width-input"
+            [placeholder]="t('singleValuePlaceholder')"/>
+        } @else {
+          <input
+            id="mergeTarget"
+            type="text"
+            pInputText
+            [(ngModel)]="mergeTarget"
+            class="full-width-input"
+            [placeholder]="isSingleValueField(currentMergeType) ? t('singleValuePlaceholder') : t('multiValuePlaceholder')"/>
+        }
         @if (isSingleValueField(currentMergeType)) {
           <small class="help-text" [innerHTML]="t('singleMergeHowItWorks', { type: getTypeLabel(currentMergeType, true), singular: getTypeLabel(currentMergeType, false) })"></small>
         } @else {
@@ -238,14 +271,26 @@
 
       <div class="form-field">
         <label for="renameTarget">{{ t('newNamesLabel') }}</label>
-        <input
-          id="renameTarget"
-          type="text"
-          pInputText
-          [(ngModel)]="renameTarget"
-          class="full-width-input"
-          [placeholder]="isSingleValueField(currentMergeType) ? t('singleRenamePlaceholder') : t('multiRenamePlaceholder')"
-          (keyup.enter)="confirmRename()"/>
+        @if (currentMergeType === 'languages') {
+          <p-select
+            [(ngModel)]="renameTarget"
+            [options]="languageOptions"
+            optionLabel="name" optionValue="code"
+            [filter]="true" filterBy="name,code"
+            [showClear]="true"
+            appendTo="body"
+            styleClass="full-width-input"
+            [placeholder]="t('singleRenamePlaceholder')"/>
+        } @else {
+          <input
+            id="renameTarget"
+            type="text"
+            pInputText
+            [(ngModel)]="renameTarget"
+            class="full-width-input"
+            [placeholder]="isSingleValueField(currentMergeType) ? t('singleRenamePlaceholder') : t('multiRenamePlaceholder')"
+            (keyup.enter)="confirmRename()"/>
+        }
         @if (isSingleValueField(currentMergeType)) {
           <small class="help-text" [innerHTML]="t('singleRenameHowItWorks', { singular: getTypeLabel(currentMergeType, false) })"></small>
         } @else {

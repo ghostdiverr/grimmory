@@ -1,4 +1,4 @@
-import {Component, effect, inject, OnDestroy, OnInit, signal} from '@angular/core';
+import {ChangeDetectorRef, Component, effect, inject, OnDestroy, OnInit, signal} from '@angular/core';
 import {Tab, TabList, TabPanel, TabPanels, Tabs} from 'primeng/tabs';
 import {TableModule} from 'primeng/table';
 import {Button} from 'primeng/button';
@@ -18,6 +18,8 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {Subscription} from 'rxjs';
 import {ExternalDocLinkComponent} from '../../../../shared/components/external-doc-link/external-doc-link.component';
 import {TranslocoDirective, TranslocoPipe, TranslocoService} from '@jsverse/transloco';
+import {Select} from 'primeng/select';
+import {LanguageOption, LanguageService} from '../../../../shared/services/language.service';
 
 interface MetadataItem {
   value: string;
@@ -57,7 +59,8 @@ interface TabConfig {
     InputIcon,
     ExternalDocLinkComponent,
     TranslocoDirective,
-    TranslocoPipe
+    TranslocoPipe,
+    Select
   ],
   providers: [ConfirmationService],
   templateUrl: './metadata-manager.component.html',
@@ -71,6 +74,11 @@ export class MetadataManagerComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private pageTitle = inject(PageTitleService);
   private readonly t = inject(TranslocoService);
+  private readonly languageService = inject(LanguageService);
+  private readonly cdRef = inject(ChangeDetectorRef);
+
+  languageOptions: LanguageOption[] = [];
+  normalizing = signal(false);
 
   private routeSub!: Subscription;
   private readonly syncMetadataEffect = effect(() => {
@@ -142,6 +150,10 @@ export class MetadataManagerComponent implements OnInit, OnDestroy {
   ];
 
   ngOnInit() {
+    this.languageService.getLanguages().subscribe(langs => {
+      this.languageOptions = langs;
+      this.cdRef.detectChanges();
+    });
     this.routeSub = this.route.queryParams.subscribe(params => {
       const tabParam = params['tab'] as MetadataType;
       if (this.validTabs.includes(tabParam)) {
@@ -611,6 +623,40 @@ export class MetadataManagerComponent implements OnInit, OnDestroy {
 
   protected isSingleValueField(type: MetadataType): boolean {
     return type === 'series' || type === 'publishers' || type === 'languages';
+  }
+
+  getLanguageDisplay(code: string): string {
+    const found = this.languageOptions.find(l => l.code === code);
+    return found ? `${found.name} (${code})` : code;
+  }
+
+  isNormalizedLanguage(code: string): boolean {
+    return this.languageOptions.some(l => l.code === code);
+  }
+
+  normalizeAllLanguages(): void {
+    this.normalizing.set(true);
+    this.loading.set(true);
+    this.bookMetadataManageService.normalizeLanguages().subscribe({
+      next: () => {
+        this.normalizing.set(false);
+        this.loading.set(false);
+        this.messageService.add({
+          severity: 'success',
+          summary: this.t.translate('metadata.manager.toast.normalizeSuccessSummary'),
+          detail: this.t.translate('metadata.manager.toast.normalizeSuccessDetail')
+        });
+      },
+      error: () => {
+        this.normalizing.set(false);
+        this.loading.set(false);
+        this.messageService.add({
+          severity: 'error',
+          summary: this.t.translate('metadata.manager.toast.normalizeErrorSummary'),
+          detail: this.t.translate('metadata.manager.toast.normalizeErrorDetail')
+        });
+      }
+    });
   }
 
   protected getTotalAffectedBooks(items: MetadataItem[]): number {

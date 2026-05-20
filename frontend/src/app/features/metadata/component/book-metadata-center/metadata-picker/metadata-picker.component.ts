@@ -20,6 +20,8 @@ import {AppSettingsService} from '../../../../../shared/service/app-settings.ser
 import {MetadataProviderSpecificFields} from '../../../../../shared/model/app-settings.model';
 import {ALL_COMIC_METADATA_FIELDS, ALL_METADATA_FIELDS, AUDIOBOOK_METADATA_FIELDS, COMIC_ARRAY_METADATA_FIELDS, COMIC_FORM_TO_MODEL_LOCK, COMIC_TEXT_METADATA_FIELDS, COMIC_TEXTAREA_METADATA_FIELDS, getArrayFields, getBookDetailsFields, getBottomFields, getProviderFields, getSeriesFields, getTextareaFields, getTopFields, MetadataFieldConfig, MetadataFormBuilder, MetadataUtilsService} from '../../../../../shared/metadata';
 import {TranslocoDirective, TranslocoService} from '@jsverse/transloco';
+import {LanguageOption, LanguageService} from '../../../../../shared/services/language.service';
+import {Select} from 'primeng/select';
 
 @Component({
   selector: 'app-metadata-picker',
@@ -40,6 +42,7 @@ import {TranslocoDirective, TranslocoService} from '@jsverse/transloco';
     TranslocoDirective,
     CdkDropList,
     CdkDrag,
+    Select,
   ]
 })
 export class MetadataPickerComponent {
@@ -109,6 +112,9 @@ export class MetadataPickerComponent {
   private appSettingsService = inject(AppSettingsService);
   private formBuilder = inject(MetadataFormBuilder);
   private metadataUtils = inject(MetadataUtilsService);
+  private languageService = inject(LanguageService);
+
+  languageOptions: LanguageOption[] = [];
   private readonly t = inject(TranslocoService);
   private readonly uniqueMetadata = computed(() => this.bookService.uniqueMetadata());
 
@@ -118,6 +124,7 @@ export class MetadataPickerComponent {
   constructor() {
     this.metadataForm = this.formBuilder.buildForm(true);
     this.initFieldArrays();
+    this.languageService.getLanguages().subscribe(langs => this.languageOptions = langs);
   }
 
   private initFieldArrays(): void {

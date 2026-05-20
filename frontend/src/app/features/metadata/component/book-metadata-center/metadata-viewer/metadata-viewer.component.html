@@ -374,7 +374,7 @@
             @if (book?.shelves?.length) {
               <div class="metadata-item">
                 <span class="metadata-key">{{ t('shelvesLabel') }}</span>
-                <div class="metadata-value-group flex-wrap">
+                <div class="metadata-value-group">
                   @for (shelf of book.shelves; track shelf.id; let isLast = $last) {
                     <span class="metadata-value metadata-link" role="button" tabindex="0" (click)="goToShelf(shelf.id!)" (keydown.enter)="goToShelf(shelf.id!)">
                       {{ shelf.name }}
@@ -413,7 +413,7 @@
               <span class="metadata-key">{{ t('languageLabel') }}</span>
               @if (book?.metadata!.language) {
                 <span class="metadata-value metadata-link" role="button" tabindex="0" (click)="goToLanguage(book?.metadata!.language!)" (keydown.enter)="goToLanguage(book?.metadata!.language!)">
-                  {{ book?.metadata!.language }}
+                  {{ getLanguageName(book?.metadata!.language!) }}
                 </span>
               } @else {
                 <span class="metadata-value">-</span>
@@ -716,7 +716,7 @@
         <span>{{ t('synopsisTitle') }}</span>
       </div>
       <div class="description-body">
-        <div #descriptionContent [ngClass]="{ 'line-clamp-7': !isExpanded }" class="description-content">
+        <div #descriptionContent [ngClass]="{ 'description-content-collapsed': !isExpanded }" class="description-content">
           <div class="description-html" [innerHTML]="sanitizeDescription(book.metadata!.description)"></div>
         </div>
         @if (isExpanded || isOverflowing) {

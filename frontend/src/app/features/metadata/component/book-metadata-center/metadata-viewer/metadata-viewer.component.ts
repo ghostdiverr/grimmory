@@ -36,6 +36,7 @@ import {AppSettingsService} from '../../../../../shared/service/app-settings.ser
 import {DeleteBookFileEvent, DeleteSupplementaryFileEvent, DetachBookFileEvent, DownloadAdditionalFileEvent, DownloadAllFilesEvent, DownloadEvent, MetadataTabsComponent, ReadEvent} from './metadata-tabs/metadata-tabs.component';
 import {TranslocoDirective, TranslocoPipe, TranslocoService} from '@jsverse/transloco';
 import {AuthorService} from '../../../../author-browser/service/author.service';
+import {LanguageOption, LanguageService} from '../../../../../shared/services/language.service';
 import {Dialog} from 'primeng/dialog';
 import {Checkbox} from 'primeng/checkbox';
 import DOMPurify from 'dompurify';
@@ -84,6 +85,7 @@ export class MetadataViewerComponent implements OnInit, OnChanges, AfterViewChec
   protected userService = inject(UserService);
   private appSettingsService = inject(AppSettingsService);
   private confirmationService = inject(ConfirmationService);
+  private languageService = inject(LanguageService);
 
   private router = inject(Router);
   private destroyRef = inject(DestroyRef);
@@ -214,7 +216,9 @@ export class MetadataViewerComponent implements OnInit, OnChanges, AfterViewChec
     items.push({
       label: this.t.translate('metadata.viewer.menuShelf'),
       icon: 'pi pi-folder',
-      command: () => this.assignShelf(book.id)
+      command: () => {
+        void this.assignShelf(book).catch(() => undefined);
+      }
     });
 
     if (permissions?.canManageLibrary || permissions?.admin) {
@@ -235,7 +239,7 @@ export class MetadataViewerComponent implements OnInit, OnChanges, AfterViewChec
         label: this.t.translate('metadata.viewer.menuUploadFile'),
         icon: 'pi pi-upload',
         command: () => {
-          this.bookDialogHelperService.openAdditionalFileUploaderDialog(book);
+          void this.bookDialogHelperService.openAdditionalFileUploaderDialog(book).catch(() => undefined);
         },
       });
     }
@@ -247,7 +251,7 @@ export class MetadataViewerComponent implements OnInit, OnChanges, AfterViewChec
         label: this.t.translate('metadata.viewer.menuOrganizeFiles'),
         icon: 'pi pi-arrows-h',
         command: () => {
-          this.openFileMoverDialog(book.id);
+          void this.openFileMoverDialog(book.id).catch(() => undefined);
         },
       });
     }
@@ -266,7 +270,7 @@ export class MetadataViewerComponent implements OnInit, OnChanges, AfterViewChec
             label: this.t.translate('metadata.viewer.menuCustomSend'),
             icon: 'pi pi-cog',
             command: () => {
-              this.bookDialogHelperService.openCustomSendDialog(book);
+              void this.bookDialogHelperService.openCustomSendDialog(book).catch(() => undefined);
             }
           }
         ]
@@ -281,7 +285,7 @@ export class MetadataViewerComponent implements OnInit, OnChanges, AfterViewChec
         label: this.t.translate('metadata.viewer.menuAttachToAnotherBook'),
         icon: 'pi pi-link',
         command: () => {
-          this.bookDialogHelperService.openBookFileAttacherDialog(book);
+          void this.bookDialogHelperService.openBookFileAttacherDialog(book).catch(() => undefined);
         },
       });
     }
@@ -440,7 +444,15 @@ export class MetadataViewerComponent implements OnInit, OnChanges, AfterViewChec
       : '';
   });
 
+  private languageOptions: LanguageOption[] = [];
+
+  getLanguageName(code: string): string {
+    const found = this.languageOptions.find(l => l.code === code);
+    return found ? found.name : code;
+  }
+
   ngOnInit(): void {
+    this.languageService.getLanguages().subscribe(langs => this.languageOptions = langs);
     this.destroyRef.onDestroy(() => this.coverImage?.closePreview());
 
     const onPopState = () => this.coverImage?.closePreview();
@@ -687,8 +699,8 @@ export class MetadataViewerComponent implements OnInit, OnChanges, AfterViewChec
     }
   }
 
-  assignShelf(bookId: number) {
-    this.bookDialogHelperService.openShelfAssignerDialog((this.bookService.findBookById(bookId) as Book), null);
+  async assignShelf(book: Book) {
+    await this.bookDialogHelperService.openShelfAssignerDialog(book, null);
   }
 
   updateReadStatus(status: ReadStatus): void {
@@ -1251,8 +1263,8 @@ export class MetadataViewerComponent implements OnInit, OnChanges, AfterViewChec
     this.editDateFinished = null;
   }
 
-  openFileMoverDialog(bookId: number): void {
-    this.bookDialogHelperService.openFileMoverDialog(new Set([bookId]));
+  async openFileMoverDialog(bookId: number) {
+    await this.bookDialogHelperService.openFileMoverDialog(new Set([bookId]));
   }
 
   protected readonly ResetProgressTypes = ResetProgressTypes;

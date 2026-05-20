@@ -1,4 +1,5 @@
 import {computed, inject, Injectable, Signal} from '@angular/core';
+import {toSignal} from '@angular/core/rxjs-interop';
 import {Book} from '../../../model/book.model';
 import {Library} from '../../../model/library.model';
 import {Shelf} from '../../../model/shelf.model';
@@ -11,6 +12,8 @@ import {EntityType} from '../book-browser.component';
 import {Filter, FILTER_CONFIGS, FILTER_EXTRACTORS, FilterType, FilterValue, NUMERIC_ID_FILTER_TYPES, SortMode} from './book-filter.config';
 import {filterBooksByFilters} from '../filters/sidebar-filter';
 import {BookFilterMode} from '../../../../settings/user-management/user.service';
+import {LanguageService} from '../../../../../shared/services/language.service';
+import {map} from 'rxjs/operators';
 
 const MAX_FILTER_ITEMS = 100;
 
@@ -19,6 +22,14 @@ export class BookFilterService {
   private readonly bookService = inject(BookService);
   private readonly libraryService = inject(LibraryService);
   private readonly bookRuleEvaluatorService = inject(BookRuleEvaluatorService);
+  private readonly languageService = inject(LanguageService);
+
+  private readonly languageNameMap = toSignal(
+    this.languageService.getLanguages().pipe(
+      map(langs => new Map(langs.map(l => [l.code, l.name])))
+    ),
+    {initialValue: new Map<string, string>()}
+  );
 
   createFilterSignals(
     entity: Signal<Library | Shelf | MagicShelf | null>,
@@ -34,10 +45,23 @@ export class BookFilterService {
 
     for (const [type, config] of Object.entries(FILTER_CONFIGS)) {
       const filterType = type as Exclude<FilterType, 'library'>;
-      signals[filterType] = computed(() => {
-        const books = filterBooksByFilters(filteredBooks(), activeFilters(), filterMode(), filterType);
-        return this.buildAndSortFilters(books, FILTER_EXTRACTORS[filterType], config.sortMode);
-      });
+      if (filterType === 'language') {
+        signals.language = computed(() => {
+          const books = filterBooksByFilters(filteredBooks(), activeFilters(), filterMode(), 'language');
+          const nameMap = this.languageNameMap();
+          const extractor = (book: Book): FilterValue[] => {
+            const code = book.metadata?.language;
+            if (!code) return [];
+            return [{id: code, name: nameMap.get(code) ?? code}];
+          };
+          return this.buildAndSortFilters(books, extractor, config.sortMode);
+        });
+      } else {
+        signals[filterType] = computed(() => {
+          const books = filterBooksByFilters(filteredBooks(), activeFilters(), filterMode(), filterType);
+          return this.buildAndSortFilters(books, FILTER_EXTRACTORS[filterType], config.sortMode);
+        });
+      }
     }
 
     signals.library = computed(() => {

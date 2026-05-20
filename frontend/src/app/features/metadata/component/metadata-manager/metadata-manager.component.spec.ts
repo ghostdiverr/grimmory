@@ -1,6 +1,6 @@
-import {signal} from '@angular/core';
+import {ChangeDetectorRef, signal} from '@angular/core';
 import {TestBed} from '@angular/core/testing';
-import {BehaviorSubject, of} from 'rxjs';
+import {BehaviorSubject, of, throwError} from 'rxjs';
 import {beforeEach, describe, expect, it, vi} from 'vitest';
 import {TranslocoService} from '@jsverse/transloco';
 import {ActivatedRoute, Router} from '@angular/router';
@@ -10,6 +10,7 @@ import {Book} from '../../../book/model/book.model';
 import {BookMetadataManageService} from '../../../book/service/book-metadata-manage.service';
 import {BookService} from '../../../book/service/book.service';
 import {PageTitleService} from '../../../../shared/service/page-title.service';
+import {LanguageOption, LanguageService} from '../../../../shared/services/language.service';
 import {MetadataManagerComponent} from './metadata-manager.component';
 
 describe('MetadataManagerComponent', () => {
@@ -21,6 +22,8 @@ describe('MetadataManagerComponent', () => {
   const translate = vi.fn((key: string) => `translated:${key}`);
   const consolidateMetadata = vi.fn(() => of(void 0));
   const deleteMetadata = vi.fn(() => of(void 0));
+  const normalizeLanguages = vi.fn(() => of(void 0));
+  const getLanguages = vi.fn(() => of([] as LanguageOption[]));
   let queryParams$: BehaviorSubject<Record<string, unknown>>;
 
   beforeEach(() => {
@@ -30,6 +33,10 @@ describe('MetadataManagerComponent', () => {
     translate.mockClear();
     consolidateMetadata.mockClear();
     deleteMetadata.mockClear();
+    normalizeLanguages.mockClear();
+    normalizeLanguages.mockReturnValue(of(void 0));
+    getLanguages.mockClear();
+    getLanguages.mockReturnValue(of([]));
     books.set([]);
     isBooksLoading.set(false);
     queryParams$ = new BehaviorSubject<Record<string, unknown>>({});
@@ -37,12 +44,14 @@ describe('MetadataManagerComponent', () => {
     TestBed.configureTestingModule({
       providers: [
         {provide: BookService, useValue: {books, isBooksLoading}},
-        {provide: BookMetadataManageService, useValue: {consolidateMetadata, deleteMetadata}},
+        {provide: BookMetadataManageService, useValue: {consolidateMetadata, deleteMetadata, normalizeLanguages}},
         {provide: PageTitleService, useValue: {setPageTitle}},
         {provide: TranslocoService, useValue: {translate}},
         {provide: MessageService, useValue: {add}},
         {provide: ActivatedRoute, useValue: {queryParams: queryParams$}},
         {provide: Router, useValue: {navigate}},
+        {provide: LanguageService, useValue: {getLanguages}},
+        {provide: ChangeDetectorRef, useValue: {detectChanges: vi.fn()}},
       ]
     });
   });
@@ -189,6 +198,71 @@ describe('MetadataManagerComponent', () => {
         sidebar: true,
         filter: 'author:A%26B',
       }
+    });
+  });
+
+  describe('getLanguageDisplay', () => {
+    it('returns the localized name and code when the code is known', () => {
+      getLanguages.mockReturnValue(of([{code: 'fr', name: 'French'}, {code: 'en', name: 'English'}]));
+      const component = createComponent();
+      component.ngOnInit();
+
+      expect(component.getLanguageDisplay('fr')).toBe('French (fr)');
+    });
+
+    it('returns the raw code as fallback when the code is unknown', () => {
+      const component = createComponent();
+      component.ngOnInit();
+
+      expect(component.getLanguageDisplay('xx')).toBe('xx');
+    });
+  });
+
+  describe('isNormalizedLanguage', () => {
+    it('returns true for a code present in languageOptions', () => {
+      getLanguages.mockReturnValue(of([{code: 'fr', name: 'French'}]));
+      const component = createComponent();
+      component.ngOnInit();
+
+      expect(component.isNormalizedLanguage('fr')).toBe(true);
+    });
+
+    it('returns false for a code absent from languageOptions', () => {
+      getLanguages.mockReturnValue(of([{code: 'fr', name: 'French'}]));
+      const component = createComponent();
+      component.ngOnInit();
+
+      expect(component.isNormalizedLanguage('français')).toBe(false);
+    });
+
+    it('returns false for any code when options are empty', () => {
+      const component = createComponent();
+
+      expect(component.isNormalizedLanguage('en')).toBe(false);
+    });
+  });
+
+  describe('normalizeAllLanguages', () => {
+    it('sets loading state, calls the service, shows success toast, and resets state', () => {
+      const component = createComponent();
+
+      component.normalizeAllLanguages();
+
+      expect(component.normalizing()).toBe(false);
+      expect(component.loading()).toBe(false);
+      expect(normalizeLanguages).toHaveBeenCalledOnce();
+      expect(add).toHaveBeenCalledWith(expect.objectContaining({severity: 'success'}));
+    });
+
+    it('resets loading state and shows error toast on failure', () => {
+      normalizeLanguages.mockReturnValueOnce(throwError(() => new Error('fail')));
+      const component = createComponent();
+
+      component.normalizeAllLanguages();
+
+      expect(component.normalizing()).toBe(false);
+      expect(component.loading()).toBe(false);
+      expect(add).toHaveBeenCalledWith(expect.objectContaining({severity: 'error'}));
     });
   });
 });

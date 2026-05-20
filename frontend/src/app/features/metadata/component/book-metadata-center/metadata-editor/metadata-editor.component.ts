@@ -33,6 +33,7 @@ import {UserService} from '../../../../settings/user-management/user.service';
 import {AppSettingsService} from '../../../../../shared/service/app-settings.service';
 import {MetadataProviderSpecificFields} from '../../../../../shared/model/app-settings.model';
 import {TranslocoDirective, TranslocoService} from '@jsverse/transloco';
+import {LanguageService, LanguageOption} from '../../../../../shared/services/language.service';
 import {CdkDragDrop, CdkDropList, CdkDrag, moveItemInArray} from '@angular/cdk/drag-drop';
 
 @Component({
@@ -106,7 +107,10 @@ export class MetadataEditorComponent implements OnInit {
   private destroyRef = inject(DestroyRef);
   private appSettingsService = inject(AppSettingsService);
   private readonly t = inject(TranslocoService);
+  private readonly languageService = inject(LanguageService);
   private readonly uniqueMetadata = computed(() => this.bookService.uniqueMetadata());
+
+  languageOptions: LanguageOption[] = [];
 
   metadataForm: FormGroup;
   currentBookId!: number;
@@ -406,6 +410,7 @@ export class MetadataEditorComponent implements OnInit {
       this.metadataCenterViewMode = user.userSettings.metadataCenterViewMode ?? 'route';
       this.autoSaveEnabled = user.userSettings.autoSaveMetadata ?? false;
     }
+    this.languageService.getLanguages().subscribe(langs => this.languageOptions = langs);
   }
 
   private populateFormFromMetadata(metadata: BookMetadata): void {
@@ -1180,8 +1185,8 @@ export class MetadataEditorComponent implements OnInit {
     this.closeDialogButtonClicked.emit();
   }
 
-  openCoverSearch() {
-    const ref = this.bookDialogHelperService.openCoverSearchDialog(this.currentBookId, 'ebook');
+  async openCoverSearch() {
+    const ref = await this.bookDialogHelperService.openCoverSearchDialog(this.currentBookId, 'ebook');
     ref?.onClose.pipe(
       take(1),
       filter(result => !!result),
@@ -1270,8 +1275,8 @@ export class MetadataEditorComponent implements OnInit {
     return this.bookMetadataManageService.getUploadAudiobookCoverUrl(this.currentBookId);
   }
 
-  openAudiobookCoverSearch() {
-    const ref = this.bookDialogHelperService.openCoverSearchDialog(this.currentBookId, 'audiobook');
+  async openAudiobookCoverSearch() {
+    const ref = await this.bookDialogHelperService.openCoverSearchDialog(this.currentBookId, 'audiobook');
     ref?.onClose.pipe(
       take(1),
       filter(result => !!result),

@@ -7,6 +7,7 @@ import org.booklore.model.dto.BookMetadata;
 import org.booklore.model.dto.request.FetchMetadataRequest;
 import org.booklore.model.enums.MetadataProvider;
 import org.booklore.service.appsettings.AppSettingService;
+import org.booklore.util.LanguageNormalizer;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -232,7 +233,7 @@ public class LubimyCzytacParser implements BookParser {
         Elements languageElements = doc.select("dt:contains(Język:) + dd");
         if (!languageElements.isEmpty()) {
             String language = languageElements.first().text().trim().toLowerCase();
-            metadata.setLanguage(mapLanguage(language));
+            metadata.setLanguage(LanguageNormalizer.normalize(language));
         }
 
         Element descElement = doc.selectFirst("#book-description");
@@ -334,18 +335,6 @@ public class LubimyCzytacParser implements BookParser {
         }
 
         return false;
-    }
-
-    private String mapLanguage(String polishLanguage) {
-        return switch (polishLanguage) {
-            case "polski" -> "pl";
-            case "angielski" -> "en";
-            case "niemiecki" -> "de";
-            case "francuski" -> "fr";
-            case "hiszpański" -> "es";
-            case "włoski" -> "it";
-            default -> polishLanguage;
-        };
     }
 
     private void parseSeriesInfo(String seriesText, BookMetadata metadata) {

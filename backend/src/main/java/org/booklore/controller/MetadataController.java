@@ -105,6 +105,15 @@ public class MetadataController {
         return ResponseEntity.noContent().build();
     }
 
+    @Operation(summary = "Normalize all language values to ISO 639-1", description = "Normalize language field on all books. Requires metadata edit permission or admin.")
+    @ApiResponse(responseCode = "204", description = "Languages normalized successfully")
+    @PostMapping("/metadata/manage/normalize-languages")
+    @PreAuthorize("@securityUtil.canBulkEditMetadata() or @securityUtil.isAdmin()")
+    public ResponseEntity<Void> normalizeLanguages() {
+        metadataManagementService.normalizeAllLanguages();
+        return ResponseEntity.noContent().build();
+    }
+
     @Operation(summary = "Delete metadata values", description = "Delete metadata values. Requires metadata edit permission or admin.")
     @ApiResponse(responseCode = "204", description = "Metadata deleted successfully")
     @PostMapping("/metadata/manage/delete")

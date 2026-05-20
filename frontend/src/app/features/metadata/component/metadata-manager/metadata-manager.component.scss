@@ -156,6 +156,17 @@
   }
 }
 
+.info-icon {
+  font-size: 1.125rem;
+  color: red;
+  cursor: help;
+  transition: opacity 0.2s;
+
+  &:hover {
+    opacity: 1;
+  }
+}
+
 .settings-description {
   opacity: 0.7;
   font-size: 0.875rem;
@@ -164,17 +175,6 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-
-  .info-icon {
-    font-size: 1.125rem;
-    color: red;
-    cursor: help;
-    transition: opacity 0.2s;
-
-    &:hover {
-      opacity: 1;
-    }
-  }
 }
 
 ::ng-deep {
@@ -314,6 +314,7 @@
     text-decoration: underline;
   }
 }
+
 
 .user-dialog {
   .p-dialog-content {

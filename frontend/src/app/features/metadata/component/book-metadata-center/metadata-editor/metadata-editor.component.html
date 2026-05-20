@@ -256,7 +256,13 @@
             <div class="field-group language-field">
               <label for="language">{{ t('language') }} @if (isEmbeddable('language', book)) { <i class="pi pi-file-export embeddable-indicator" [pTooltip]="t('writtenToFileTooltip')" tooltipPosition="top"></i> }</label>
               <div class="field-with-lock">
-                <input pInputText id="language" formControlName="language"/>
+                <p-select id="language" formControlName="language"
+                          [options]="languageOptions"
+                          optionLabel="name" optionValue="code"
+                          [filter]="true" filterBy="name,code"
+                          [showClear]="true"
+                          appendTo="body"
+                          [placeholder]="t('languagePlaceholder')"/>
                 @if (!book.metadata!['languageLocked']) {
                   <p-button icon="pi pi-lock-open" [outlined]="true" (onClick)="toggleLock('language')" severity="success"></p-button>
                 }

@@ -39,6 +39,7 @@
     "title": "Titre",
     "subtitle": "Sous-titre",
     "language": "Langue",
+    "languagePlaceholder": "Sélectionner ou saisir une langue",
     "authors": "Auteurs",
     "publisher": "Éditeur",
     "publishDate": "Date de publication",
@@ -470,6 +471,9 @@
     "singleRenameHowItWorks": "<strong>Comment ça marche :</strong><br/>• Entrez une nouvelle valeur pour renommer ce {{ singular }}<br/><br/><strong>Note :</strong> Chaque livre ne peut avoir qu'un seul {{ singular }}, la division en plusieurs valeurs n'est donc pas autorisée.",
     "multiRenameHowItWorks": "<strong>Comment ça marche :</strong><br/>• Entrez une seule valeur pour renommer le {{ singular }}<br/>• Entrez plusieurs valeurs séparées par des virgules pour diviser en plusieurs {{ type }}<br/><br/><strong>Exemple :</strong> Lors du renommage/division de « Mystère & Policier »<br/>• Renommer : Entrez « Mystère » → Renomme en « Mystère »<br/>• Diviser : Entrez « Mystère, Policier » → Divise en deux {{ type }} séparés",
     "renameProcessingNote": "Ce processus peut prendre un certain temps si « Écrire dans le fichier » est activé dans les paramètres.",
+    "normalizeAll": "Normaliser tout",
+    "languageNotNormalized": "Code ISO 639-1 non reconnu — cliquez sur « Normaliser tout » ou renommez manuellement",
+    "languageAlreadyNormalized": "Code ISO 639-1 valide — aucune correction nécessaire",
     "deleteDialogTitle": "Supprimer {{ type }}",
     "deleteWarning": "Vous êtes sur le point de supprimer {{ count }} {{ type }} :",
     "whatWillHappen": "Ce qui va se passer :",
@@ -525,7 +529,11 @@
       "deleteSuccessfulDetail": "{{ count }} {{ type }} supprimés avec succès. {{ bookCount }} livre(s) mis à jour.",
       "deleteFailedSummary": "Échec de la suppression",
       "deleteFailedDetail": "Une erreur s'est produite lors de la suppression.",
-      "deleteSelectMinDetail": "Veuillez sélectionner au moins un élément à supprimer."
+      "deleteSelectMinDetail": "Veuillez sélectionner au moins un élément à supprimer.",
+      "normalizeSuccessSummary": "Langues normalisées",
+      "normalizeSuccessDetail": "Toutes les langues ont été normalisées en codes ISO 639-1.",
+      "normalizeErrorSummary": "Normalisation échouée",
+      "normalizeErrorDetail": "Une erreur s'est produite lors de la normalisation des langues."
     }
   },
   "advancedFetchOptions": {

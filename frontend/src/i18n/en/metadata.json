@@ -39,6 +39,7 @@
     "title": "Title",
     "subtitle": "Subtitle",
     "language": "Language",
+    "languagePlaceholder": "Select or type a language",
     "authors": "Authors",
     "publisher": "Publisher",
     "publishDate": "Publish Date",
@@ -495,6 +496,9 @@
     "singleRenameHowItWorks": "<strong>How it works:</strong><br/>• Enter a new value to rename this {{ singular }}<br/><br/><strong>Note:</strong> Each book can only have one {{ singular }}, so splitting into multiple values is not allowed.",
     "multiRenameHowItWorks": "<strong>How it works:</strong><br/>• Enter a single value to rename the {{ singular }}<br/>• Enter multiple values separated by commas to split into multiple {{ type }}<br/><br/><strong>Example:</strong> When renaming/splitting \"Mystery & Detective\"<br/>• Rename: Enter \"Mystery\" → Renames to just \"Mystery\"<br/>• Split: Enter \"Mystery, Detective\" → Splits into two separate {{ type }}",
     "renameProcessingNote": "This process may take some time if \"Write to file\" is enabled in settings.",
+    "normalizeAll": "Normalize all",
+    "languageNotNormalized": "Not a recognized ISO 639-1 code — click \"Normalize all\" or rename manually",
+    "languageAlreadyNormalized": "Already a valid ISO 639-1 code — no edit needed",
     "deleteDialogTitle": "Delete {{ type }}",
     "deleteWarning": "You are about to delete {{ count }} {{ type }}:",
     "whatWillHappen": "What will happen:",
@@ -557,6 +561,10 @@
       "deleteSuccessfulDetail": "Successfully deleted {{ count }} {{ type }}. {{ bookCount }} book(s) updated.",
       "deleteFailedSummary": "Delete Failed",
       "deleteFailedDetail": "An error occurred during deletion.",
+      "normalizeSuccessSummary": "Languages Normalized",
+      "normalizeSuccessDetail": "All language values have been normalized to ISO 639-1 codes.",
+      "normalizeErrorSummary": "Normalization Failed",
+      "normalizeErrorDetail": "An error occurred while normalizing language values.",
       "deleteSelectMinDetail": "Please select at least one item to delete."
     }
   },

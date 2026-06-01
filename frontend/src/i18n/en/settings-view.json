@@ -7,8 +7,9 @@
     "label": "Interface language"
   },
   "theme": {
-    "sectionTitle": "Theme",
-    "sectionDesc": "Pick your preferred primary and surface colors for this browser."
+    "sectionTitle": "Display",
+    "sectionDesc": "Pick your preferred app theme and appearance mode for this browser.",
+    "oledDarkMode": "OLED dark mode"
   },
   "librarySort": {
     "sectionTitle": "Library and Shelf View & Sort Preferences",

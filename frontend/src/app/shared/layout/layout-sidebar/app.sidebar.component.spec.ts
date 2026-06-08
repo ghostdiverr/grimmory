@@ -25,6 +25,8 @@ import { LibraryImportProgressService } from '../../service/library-import-progr
 import { AppVersion, VersionService } from '../../service/version.service';
 import { DialogLauncherService } from '../../services/dialog-launcher.service';
 import { LayoutService } from '../layout.service';
+import { AppThemeService } from '../../service/app-theme.service';
+import type { AppearancePreference } from '../../model/app-state.model';
 
 import { AppSidebarComponent } from './app.sidebar.component';
 
@@ -42,8 +44,10 @@ describe('AppSidebarComponent', () => {
   let versionInfo: BehaviorSubject<AppVersion>;
   let activeTasks$: BehaviorSubject<Record<string, MetadataBatchProgressNotification>>;
   let progressUpdates$: BehaviorSubject<MetadataBatchProgressNotification>;
-  let hasPendingFiles$: BehaviorSubject<boolean>;
+  let hasPendingFiles: WritableSignal<boolean>;
   let hasActiveImport: WritableSignal<boolean>;
+  let setAppearancePreference: ReturnType<typeof vi.fn>;
+  let appState: WritableSignal<{ appearancePreference: AppearancePreference }>;
   const sidebarCollapsed = signal(false);
   const isDesktop = signal(true);
   const currentPath = signal('/dashboard');
@@ -71,8 +75,12 @@ describe('AppSidebarComponent', () => {
       status: MetadataBatchStatus.COMPLETED,
       review: false,
     });
-    hasPendingFiles$ = new BehaviorSubject(false);
+    hasPendingFiles = signal(false);
     hasActiveImport = signal(false);
+    appState = signal({ appearancePreference: 'system' });
+    setAppearancePreference = vi.fn((appearancePreference: AppearancePreference) => {
+      appState.update(state => ({...state, appearancePreference}));
+    });
 
     TestBed.configureTestingModule({
       imports: [AppSidebarComponent, getTranslocoModule()],
@@ -101,7 +109,7 @@ describe('AppSidebarComponent', () => {
         { provide: BookDialogHelperService, useValue: { openShelfCreatorDialog: vi.fn(() => Promise.resolve(null)) } },
         { provide: AuthService, useValue: { logout: vi.fn() } },
         { provide: MetadataProgressService, useValue: { activeTasks$, progressUpdates$ } },
-        { provide: BookdropFileService, useValue: { hasPendingFiles$ } },
+        { provide: BookdropFileService, useValue: { hasPendingFiles } },
         { provide: LibraryImportProgressService, useValue: { hasActiveImport } },
         { provide: VersionService, useValue: { getVersion: vi.fn(() => versionInfo) } },
         { provide: LayoutService, useValue: layoutService },
@@ -110,6 +118,14 @@ describe('AppSidebarComponent', () => {
         { provide: SeriesDataService, useValue: { allSeries: signal([]) } },
         { provide: AuthorService, useValue: { allAuthors: signal([]) } },
         { provide: MessageService, useValue: { add: vi.fn() } },
+        {
+          provide: AppThemeService,
+          useValue: {
+            appState,
+            appearancePreference: computed(() => appState().appearancePreference),
+            setAppearancePreference,
+          },
+        },
       ],
     });
 
@@ -202,6 +218,21 @@ describe('AppSidebarComponent', () => {
     expect(component.userInitials()).toBe('');
   });
 
+  it('updates the appearance preference without closing the appearance menu', () => {
+    const sidebar = component as unknown as {
+      appearanceMenuOpen: Signal<boolean>;
+      toggleAppearanceMenu(): void;
+      updateAppearancePreference(appearancePreference: AppearancePreference): void;
+    };
+
+    sidebar.toggleAppearanceMenu();
+    sidebar.updateAppearancePreference('dark');
+
+    expect(setAppearancePreference).toHaveBeenCalledWith('dark');
+    expect(appState().appearancePreference).toBe('dark');
+    expect(sidebar.appearanceMenuOpen()).toBe(true);
+  });
+
   it('normalizes semantic version labels with or without a leading v', () => {
     const sidebar = component as unknown as { appVersionLabel: () => string };
 
@@ -288,7 +319,7 @@ describe('AppSidebarComponent', () => {
         review: true,
       },
     });
-    hasPendingFiles$.next(true);
+    hasPendingFiles.set(true);
     hasActiveImport.set(true);
 
     expect(sidebar.completedTaskCount()).toBe(4);

@@ -39,25 +39,23 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           fetch-depth: 0
           persist-credentials: false
 
       - name: Install just
-        uses: taiki-e/install-action@c070f87102a1c75b3183910f391c1cb887fe13c8 # v2.77.6
+        uses: taiki-e/install-action@4bc351f7f2614e48088386e2a0ad917ca3a7e4ba # v2.81.5
         with:
           tool: just
+
+      - name: Set Up pnpm
+        uses: pnpm/action-setup@0e279bb959325dab635dd2c09392533439d90093 # v6.0.8
 
       - name: Set Up Node.js
         uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
         with:
-          node-version: '24'
-
-      - name: Enable Corepack
-        run: |
-          corepack enable
-          corepack yarn --version
+          node-version-file: .nvmrc
 
       - name: Install Release Tooling Dependencies
         run: just release install

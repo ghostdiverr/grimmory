@@ -34,13 +34,13 @@ COPY backend/gradlew backend/gradlew.bat backend/build.gradle.kts backend/settin
 COPY backend/gradle ./gradle
 RUN chmod +x ./gradlew
 
-RUN --mount=type=cache,target=/home/gradle/.gradle \
+RUN --mount=type=cache,target=/home/gradle/.gradle/caches \
     ./gradlew --no-daemon dependencies
 
 COPY backend/ ./
 COPY --from=frontend-build /workspace/frontend/dist/grimmory/browser /tmp/frontend-dist
 
-RUN --mount=type=cache,target=/home/gradle/.gradle \
+RUN --mount=type=cache,target=/home/gradle/.gradle/caches \
     TARGETARCH=${TARGETARCH} ./gradlew --no-daemon -PfrontendDistDir=/tmp/frontend-dist bootJar
 
 RUN set -eux; \

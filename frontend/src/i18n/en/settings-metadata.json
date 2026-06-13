@@ -66,7 +66,9 @@
     "babelioUserLoginLabel": "Email / Username",
     "babelioUserLoginPlaceholder": "e.g. john@example.com",
     "babelioPasswordLabel": "Password",
-    "babelioPasswordPlaceholder": "Enter your Babelio password"
+    "babelioPasswordPlaceholder": "Enter your Babelio password",
+    "goodreadsWarning": "The Goodreads metadata provider is currently reported as degraded for most users.",
+    "goodreadsWarningReadMore": "Read more in Github Issue #1713."
   },
   "publicReviews": {
     "sectionTitle": "Public Reviews",

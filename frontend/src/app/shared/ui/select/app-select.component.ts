@@ -1,0 +1,216 @@
+import { NgTemplateOutlet } from '@angular/common';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  contentChild,
+  model,
+} from '@angular/core';
+import { type FormValueControl } from '@angular/forms/signals';
+import { Combobox, ComboboxInput, ComboboxPopupContainer } from '@angular/aria/combobox';
+import { Listbox, Option } from '@angular/aria/listbox';
+import { OverlayModule } from '@angular/cdk/overlay';
+import { TranslocoPipe } from '@jsverse/transloco';
+import { LucideCheck, LucideChevronDown, LucideLoaderCircle, LucideSearch, LucideX } from '@lucide/angular';
+
+import { AppSelectBaseDirective } from './app-select-base.directive';
+import { AppSelectSelectedTemplateDirective } from './app-select.templates';
+import { type SelectOption } from './app-select.options';
+
+@Component({
+  selector: 'app-select',
+  standalone: true,
+  imports: [
+    NgTemplateOutlet,
+    OverlayModule,
+    Combobox,
+    ComboboxInput,
+    ComboboxPopupContainer,
+    Listbox,
+    Option,
+    TranslocoPipe,
+    LucideCheck,
+    LucideChevronDown,
+    LucideLoaderCircle,
+    LucideSearch,
+    LucideX,
+  ],
+  host: { class: 'block w-full' },
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    <div ngCombobox #cb="ngCombobox" [readonly]="true" [disabled]="disabled()" class="relative block h-full w-full">
+      <div
+        #origin
+        [class]="triggerClass()"
+        [attr.data-expanded]="cb.expanded() ? 'true' : null">
+        <input
+          ngComboboxInput
+          #input
+          readonly
+          type="text"
+          autocomplete="off"
+          spellcheck="false"
+          [value]="triggerLabel()"
+          [attr.id]="resolvedInputId()"
+          [attr.name]="name() || null"
+          [attr.aria-label]="ariaLabel() || null"
+          [attr.aria-labelledby]="ariaLabelledBy() || null"
+          [attr.aria-invalid]="showInvalid() ? 'true' : null"
+          [attr.aria-readonly]="readonly() ? 'true' : null"
+          [attr.aria-busy]="pending() ? 'true' : null"
+          [attr.aria-describedby]="resolvedDescribedBy()"
+          [disabled]="disabled()"
+          [required]="required()"
+          (keydown)="onTriggerKeydown($event)"
+          (blur)="onTriggerBlur($event)"
+          class="absolute inset-0 z-10 h-full w-full cursor-pointer rounded-md border-0 bg-transparent p-0 text-transparent caret-transparent outline-hidden disabled:cursor-default" />
+
+        <span aria-hidden="true" [class]="labelClass()" [class.text-text-muted]="!hasSelection()">
+          @if (selectedTemplate(); as tpl) {
+            @if (selectedOption(); as opt) {
+              <ng-container [ngTemplateOutlet]="tpl.template" [ngTemplateOutletContext]="{ $implicit: opt }" />
+            } @else {
+              {{ placeholder() }}
+            }
+          } @else {
+            {{ triggerLabel() }}
+          }
+        </span>
+
+        @if (showClear() && hasSelection() && !isUnavailable()) {
+          <button
+            type="button"
+            [attr.aria-label]="'shared.ui.select.clearSelection' | transloco"
+            [class]="clearButtonClass()"
+            (click)="clear($event)">
+            <svg lucideX class="size-4" aria-hidden="true"></svg>
+          </button>
+        }
+
+        <span [class]="indicatorClass()">
+          @if (pending()) {
+            <svg lucideLoaderCircle class="size-4 animate-spin" aria-hidden="true"></svg>
+          } @else {
+            <svg lucideChevronDown class="size-4 transition-transform" [class.rotate-180]="cb.expanded()" aria-hidden="true"></svg>
+          }
+        </span>
+      </div>
+
+      <ng-template ngComboboxPopupContainer>
+        <ng-template
+          [cdkConnectedOverlay]="{
+            origin,
+            usePopover: 'inline',
+            matchWidth: true,
+            positions: overlayPositions,
+            viewportMargin: 8,
+            push: true
+          }"
+          [cdkConnectedOverlayOpen]="cb.expanded()"
+          [cdkConnectedOverlayScrollStrategy]="overlayScrollStrategy"
+          (attach)="onOverlayAttach()">
+          <div [class]="surfaceClass">
+            @if (filter()) {
+              <div [class]="filterRowClass">
+                <input
+                  #filterInput
+                  type="text"
+                  [value]="filterText()"
+                  (input)="filterText.set(filterInput.value)"
+                  (keydown)="onFilterKeydown($event)"
+                  [placeholder]="filterPlaceholder() || ('shared.ui.select.search' | transloco)"
+                  [readonly]="readonly()"
+                  [class]="filterInputClass" />
+                <svg lucideSearch class="size-4 shrink-0" aria-hidden="true"></svg>
+              </div>
+            }
+
+            <ul
+              ngListbox
+              tabindex="-1"
+              focusMode="activedescendant"
+              selectionMode="explicit"
+              [values]="listboxValues()"
+              [readonly]="readonly()"
+              [disabled]="disabled()"
+              (valuesChange)="onValuesChange($event)"
+              [class]="listClass()">
+              @for (grp of renderedGroups(); track grp.trackKey; let first = $first) {
+                @if (grouped()) {
+                  @if (!first) {
+                    <li role="separator" [class]="separatorClass"></li>
+                  }
+                  <li role="presentation" [class]="sectionClass">{{ grp.label }}</li>
+                }
+                @for (option of grp.options; track option) {
+                  <li
+                    ngOption
+                    tabindex="-1"
+                    [value]="option.value"
+                    [label]="option.label"
+                    [disabled]="option.disabled === true"
+                    [class]="optionClass">
+                    @if (optionTemplate(); as tpl) {
+                      <ng-container [ngTemplateOutlet]="tpl.template" [ngTemplateOutletContext]="{ $implicit: option }" />
+                    } @else {
+                      <span class="truncate leading-5">{{ option.label }}</span>
+                    }
+                    @if (isSelected(option)) {
+                      <svg lucideCheck class="order-last ml-auto size-4 shrink-0 text-primary" aria-hidden="true"></svg>
+                    }
+                  </li>
+                }
+              } @empty {
+                <li [class]="emptyClass">{{ emptyMessage() || ('shared.ui.select.noResults' | transloco) }}</li>
+              }
+            </ul>
+          </div>
+        </ng-template>
+      </ng-template>
+    </div>
+  `,
+})
+export class AppSelectComponent<T> extends AppSelectBaseDirective<T> implements FormValueControl<T | null> {
+  readonly value = model<T | null>(null);
+
+  protected readonly selectedTemplate = contentChild(AppSelectSelectedTemplateDirective);
+
+  protected readonly selectedOption = computed<SelectOption<T> | null>(() => {
+    const value = this.value();
+    if (value == null) return null;
+    return this.findOptionForValue(value);
+  });
+
+  protected override readonly hasSelection = computed(() => this.value() != null);
+
+  protected override readonly triggerLabel = computed(() => this.selectedOption()?.label ?? this.placeholder());
+
+  protected override readonly listboxValues = computed<T[]>(() => {
+    const value = this.value();
+    const option = value == null ? null : this.findVisibleOptionForValue(value);
+    return option ? [option.value] : [];
+  });
+
+  protected override onValuesChange(values: readonly T[]): void {
+    if (this.isUnavailable()) return;
+    this.touched.set(true);
+
+    if (values.length) {
+      this.value.set(values[values.length - 1]);
+      return;
+    }
+
+    const current = this.value();
+    if (current != null && !this.isVisibleValue(current)) return;
+    this.value.set(null);
+  }
+
+  protected override clearValue(): void {
+    this.value.set(null);
+  }
+
+  protected override isSelected(option: SelectOption<T>): boolean {
+    const value = this.value();
+    return value != null && this.valuesMatch(option.value, value);
+  }
+}

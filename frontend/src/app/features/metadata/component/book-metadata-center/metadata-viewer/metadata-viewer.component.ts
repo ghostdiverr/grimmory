@@ -7,7 +7,7 @@ import {Rating, RatingRateEvent} from 'primeng/rating';
 import {FormsModule} from '@angular/forms';
 import {Book, BookFile, BookMetadata, BookRecommendation, BookType, ComicMetadata, FileInfo, ReadStatus} from '../../../../book/model/book.model';
 import {UrlHelperService} from '../../../../../shared/service/url-helper.service';
-import {CoverPlaceholderComponent} from '../../../../../shared/components/cover-generator/cover-generator.component';
+import {CoverComponent} from '../../../../../shared/components/cover/cover.component';
 import {UserService} from '../../../../settings/user-management/user.service';
 import {SplitButton} from 'primeng/splitbutton';
 import {ConfirmationService, MenuItem, MessageService} from 'primeng/api';
@@ -25,7 +25,6 @@ import {ResetProgressType, ResetProgressTypes} from '../../../../../shared/const
 import {DatePicker} from 'primeng/datepicker';
 import {ProgressSpinner} from 'primeng/progressspinner';
 import {TieredMenu} from 'primeng/tieredmenu';
-import {Image} from 'primeng/image';
 import {BookDialogHelperService} from '../../../../book/components/book-browser/book-dialog-helper.service';
 import {LibraryService} from '../../../../book/service/library.service';
 import {TagColor, TagComponent} from '../../../../../shared/components/tag/tag.component';
@@ -48,7 +47,7 @@ import DOMPurify from 'dompurify';
   standalone: true,
   templateUrl: './metadata-viewer.component.html',
   styleUrl: './metadata-viewer.component.scss',
-  imports: [Button, Rating, FormsModule, SplitButton, NgClass, Tooltip, DecimalPipe, ProgressBar, Menu, DatePicker, ProgressSpinner, TieredMenu, Image, TagComponent, MetadataTabsComponent, TranslocoDirective, TranslocoPipe, Dialog, Checkbox, CoverPlaceholderComponent]
+  imports: [Button, Rating, FormsModule, SplitButton, NgClass, Tooltip, DecimalPipe, ProgressBar, Menu, DatePicker, ProgressSpinner, TieredMenu, TagComponent, MetadataTabsComponent, TranslocoDirective, TranslocoPipe, Dialog, Checkbox, CoverComponent]
 })
 export class MetadataViewerComponent implements OnInit, AfterViewChecked {
   private bookService = inject(BookService);
@@ -431,7 +430,6 @@ export class MetadataViewerComponent implements OnInit, AfterViewChecked {
   get bookInSeries(): Book[] {
     return this.bookInSeriesSignal();
   }
-  @ViewChild(Image) private coverImage?: Image;
   @ViewChild('descriptionContent') descriptionContentRef?: ElementRef<HTMLElement>;
   isExpanded = false;
   isOverflowing = false;

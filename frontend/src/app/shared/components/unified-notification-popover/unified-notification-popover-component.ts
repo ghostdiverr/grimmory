@@ -7,6 +7,8 @@ import {BookdropFilesWidgetComponent} from '../../../features/bookdrop/component
 import {MetadataProgressWidgetComponent} from '../metadata-progress-widget/metadata-progress-widget-component';
 import {LibraryImportProgressService} from '../../service/library-import-progress.service';
 import {LibraryImportProgressWidgetComponent} from '../library-import-progress-widget/library-import-progress-widget-component';
+import {AcquisitionProgressService} from '../../service/acquisition-progress.service';
+import {AcquisitionJobWidgetComponent} from '../acquisition-job-widget/acquisition-job-widget-component';
 
 @Component({
   selector: 'app-unified-notification-popover-component',
@@ -14,7 +16,8 @@ import {LibraryImportProgressWidgetComponent} from '../library-import-progress-w
     LiveNotificationBoxComponent,
     MetadataProgressWidgetComponent,
     LibraryImportProgressWidgetComponent,
-    BookdropFilesWidgetComponent
+    BookdropFilesWidgetComponent,
+    AcquisitionJobWidgetComponent
   ],
   templateUrl: './unified-notification-popover-component.html',
   standalone: true,
@@ -25,9 +28,11 @@ export class UnifiedNotificationBoxComponent {
   private readonly metadataProgressService = inject(MetadataProgressService);
   private readonly bookdropFileService = inject(BookdropFileService);
   private readonly libraryImportProgressService = inject(LibraryImportProgressService);
+  private readonly acquisitionProgressService = inject(AcquisitionProgressService);
 
   private readonly activeMetadataTasks = toSignal(this.metadataProgressService.activeTasks$, {initialValue: {}});
   protected readonly hasMetadataTasks = computed(() => Object.keys(this.activeMetadataTasks()).length > 0);
   protected readonly hasPendingBookdropFiles = this.bookdropFileService.hasPendingFiles;
   protected readonly hasActiveLibraryImport = this.libraryImportProgressService.hasActiveImport;
+  protected readonly hasActiveAcquisitionJobs = this.acquisitionProgressService.hasActiveJobs;
 }

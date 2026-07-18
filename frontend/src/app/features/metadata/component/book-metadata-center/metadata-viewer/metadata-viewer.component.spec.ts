@@ -20,6 +20,7 @@ import {AuthorService} from '../../../../author-browser/service/author.service';
 import {Router} from '@angular/router';
 import {BookNavigationService} from '../../../../book/service/book-navigation.service';
 import {BookMetadataHostService} from '../../../../../shared/service/book-metadata-host.service';
+import {DialogLauncherService} from '../../../../../shared/services/dialog-launcher.service';
 import {MetadataViewerComponent} from './metadata-viewer.component';
 
 interface CurrentUser {
@@ -72,6 +73,7 @@ describe('MetadataViewerComponent', () => {
   const openBookFileAttacherDialog = vi.fn(() => Promise.resolve(null));
   const openFileMoverDialog = vi.fn(() => Promise.resolve(null));
   const openShelfAssignerDialog = vi.fn(() => Promise.resolve(null));
+  const openAcquisitionSearchDialog = vi.fn(() => Promise.resolve(null));
 
   const emailBookQuick = vi.fn(() => of(void 0));
   const refreshMetadataTask = vi.fn(() => of(void 0));
@@ -180,6 +182,7 @@ describe('MetadataViewerComponent', () => {
     openBookFileAttacherDialog.mockClear();
     openFileMoverDialog.mockClear();
     openShelfAssignerDialog.mockClear();
+    openAcquisitionSearchDialog.mockClear();
 
     emailBookQuick.mockClear();
     refreshMetadataTask.mockClear();
@@ -252,6 +255,7 @@ describe('MetadataViewerComponent', () => {
           },
         },
         {provide: BookMetadataHostService, useValue: {switchBook}},
+        {provide: DialogLauncherService, useValue: {openAcquisitionSearchDialog}},
       ],
     });
   });

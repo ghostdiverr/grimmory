@@ -1,0 +1,50 @@
+<ng-container *transloco="let t; prefix: 'acquisition.tray'">
+<div class="job-border">
+  @if (Object.keys(activeJobs).length > 0) {
+    @for (job of activeJobs | keyvalue; track job; let idx = $index) {
+      <div class="job-card">
+
+        <div class="job-header-row">
+          <div class="job-title-group">
+            <p class="job-title">{{ job.value.releaseTitle }}</p>
+          </div>
+          <div class="job-tags">
+            <p-tag
+              [value]="getCategoryLabel(job.value.category)"
+              severity="secondary"
+              class="job-tag">
+            </p-tag>
+            <p-tag
+              [value]="getStatusLabel(job.value.status)"
+              [severity]="getTagSeverity(job.value.status)"
+              class="job-tag"
+            ></p-tag>
+          </div>
+        </div>
+
+        @if (job.value.status === 'FAILED' && job.value.errorMessage) {
+          <div class="job-error">
+            {{ job.value.errorMessage }}
+          </div>
+        }
+
+        <div class="action-buttons">
+          <p-button
+            [label]="t('dismissBtn')"
+            icon="pi pi-times"
+            severity="secondary"
+            size="small"
+            outlined
+            (click)="dismissJob(+job.key)">
+          </p-button>
+        </div>
+
+      </div>
+
+      @if (idx < Object.keys(activeJobs).length - 1) {
+        <p-divider></p-divider>
+      }
+    }
+  }
+</div>
+</ng-container>

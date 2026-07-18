@@ -58,6 +58,14 @@ public enum TaskType {
             true,
             "Refresh Metadata",
             "Updates metadata information for your selected books."
+    ),
+    ACQUISITION_QUEUE_SCAN(
+            false,
+            false,
+            true,
+            false,
+            "Acquisition Queue Scan",
+            "Rescans the completed-downloads folder for newly finished acquisitions and times out stale in-progress acquisition jobs."
     );
 
     @Getter

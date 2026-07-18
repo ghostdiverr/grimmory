@@ -696,6 +696,18 @@
                     class="mobile-icon-only">
                   </p-button>
                 }
+                @if ((currentUser.permissions.canEditMetadata || currentUser.permissions.admin) && prowlarrEnabled()) {
+                  <p-button
+                    [label]="t('searchDownloadBtn')"
+                    icon="pi pi-cloud-download"
+                    [outlined]="true"
+                    severity="help"
+                    (onClick)="openAcquisitionSearch(book!)"
+                    [pTooltip]="t('searchDownloadTooltip')"
+                    tooltipPosition="top"
+                    class="mobile-icon-only">
+                  </p-button>
+                }
                 @if (otherItems().length > 0) {
                   <p-button icon="pi pi-ellipsis-v" severity="info" outlined (click)="entitymenu.toggle($event)"></p-button>
                   <p-tieredMenu #entitymenu [model]="otherItems()" [popup]="true" appendTo="body"></p-tieredMenu>

@@ -13,6 +13,7 @@ import tools.jackson.core.JacksonException;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -322,6 +323,14 @@ public class SettingPersistenceHelper {
                 .conversionImageCompressionPercentage(85)
                 .forceEnableHyphenation(false)
                 .forwardToKoboStore(true)
+                .build();
+    }
+
+    public ProwlarrSettings getDefaultProwlarrSettings() {
+        return ProwlarrSettings.builder()
+                .enabled(false)
+                .bookCategories(List.of())
+                .audiobookCategories(List.of())
                 .build();
     }
 

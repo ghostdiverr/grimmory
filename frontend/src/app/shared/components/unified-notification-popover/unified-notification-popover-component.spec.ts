@@ -8,6 +8,7 @@ import {getTranslocoModule} from '../../../core/testing/transloco-testing';
 import {MetadataBatchStatus} from '../../model/metadata-batch-progress.model';
 import {MetadataProgressService} from '../../service/metadata-progress.service';
 import {LibraryImportProgressService} from '../../service/library-import-progress.service';
+import {AcquisitionProgressService} from '../../service/acquisition-progress.service';
 import {UnifiedNotificationBoxComponent} from './unified-notification-popover-component';
 
 describe('UnifiedNotificationBoxComponent', () => {
@@ -16,11 +17,13 @@ describe('UnifiedNotificationBoxComponent', () => {
   let activeTasks$: BehaviorSubject<Record<string, unknown>>;
   let hasPendingFiles: WritableSignal<boolean>;
   let hasActiveImport: WritableSignal<boolean>;
+  let hasActiveAcquisitionJobs: WritableSignal<boolean>;
 
   beforeEach(async () => {
     activeTasks$ = new BehaviorSubject<Record<string, unknown>>({});
     hasPendingFiles = signal(false);
     hasActiveImport = signal(false);
+    hasActiveAcquisitionJobs = signal(false);
 
     await TestBed.configureTestingModule({
       imports: [UnifiedNotificationBoxComponent, getTranslocoModule()],
@@ -36,6 +39,10 @@ describe('UnifiedNotificationBoxComponent', () => {
         {
           provide: LibraryImportProgressService,
           useValue: {hasActiveImport},
+        },
+        {
+          provide: AcquisitionProgressService,
+          useValue: {hasActiveJobs: hasActiveAcquisitionJobs},
         },
       ],
     }).compileComponents();
@@ -81,5 +88,13 @@ describe('UnifiedNotificationBoxComponent', () => {
     expect(popover.hasActiveLibraryImport()).toBe(false);
     hasActiveImport.set(true);
     expect(popover.hasActiveLibraryImport()).toBe(true);
+  });
+
+  it('forwards the active acquisition jobs signal', () => {
+    const popover = component as unknown as {hasActiveAcquisitionJobs: Signal<boolean>};
+
+    expect(popover.hasActiveAcquisitionJobs()).toBe(false);
+    hasActiveAcquisitionJobs.set(true);
+    expect(popover.hasActiveAcquisitionJobs()).toBe(true);
   });
 });

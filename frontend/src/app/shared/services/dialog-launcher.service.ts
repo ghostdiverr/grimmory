@@ -4,6 +4,7 @@ import {TranslocoService} from '@jsverse/transloco';
 import {MessageService} from 'primeng/api';
 import {MetadataRefreshType} from '../../features/metadata/model/request/metadata-refresh-type.enum';
 import {BookdropFinalizeResult} from '../../features/bookdrop/service/bookdrop.service';
+import {AcquisitionSearchSeed} from '../../features/acquisition/model/acquisition.model';
 
 /**
  * Dialog size classes - use these to control dialog dimensions
@@ -240,6 +241,17 @@ export class DialogLauncherService {
       return this.openDialog(IconPickerComponent, {
         showHeader: false,
         styleClass: `${DialogSize.LG} ${DialogStyle.MINIMAL}`,
+      });
+    });
+  }
+
+  async openAcquisitionSearchDialog(seed: AcquisitionSearchSeed): Promise<DynamicDialogRef | null> {
+    return this.launchLazyDialog(async () => {
+      const {AcquisitionSearchDialogComponent} = await import('../../features/acquisition/component/acquisition-search-dialog/acquisition-search-dialog.component');
+      return this.openDialog(AcquisitionSearchDialogComponent, {
+        showHeader: false,
+        styleClass: `${DialogSize.LG} ${DialogStyle.MINIMAL}`,
+        data: seed,
       });
     });
   }

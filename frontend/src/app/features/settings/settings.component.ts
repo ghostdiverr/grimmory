@@ -17,6 +17,7 @@ import {DeviceSettingsComponent} from './device-settings/device-settings-compone
 import {LibraryMetadataSettingsComponent} from './library-metadata-settings/library-metadata-settings.component';
 import {PageTitleService} from "../../shared/service/page-title.service";
 import {EmailV2Component} from './email-v2/email-v2.component';
+import {ProwlarrSettingsComponent} from './device-settings/component/prowlarr-settings/prowlarr-settings-component';
 import {TranslocoDirective} from '@jsverse/transloco';
 
 export enum SettingsTab {
@@ -33,6 +34,7 @@ export enum SettingsTab {
   OpdsV2 = 'opds',
   Tasks = 'task',
   AuditLogs = 'audit-logs',
+  Prowlarr = 'prowlarr',
 }
 
 @Component({
@@ -56,6 +58,7 @@ export enum SettingsTab {
     TaskManagementComponent,
     AuditLogsComponent,
     EmailV2Component,
+    ProwlarrSettingsComponent,
     TranslocoDirective
   ],
   templateUrl: './settings.component.html',
@@ -142,6 +145,7 @@ export class SettingsComponent implements OnInit {
       case SettingsTab.MetadataSettings:
       case SettingsTab.LibraryMetadataSettings:
       case SettingsTab.NamingPattern:
+      case SettingsTab.Prowlarr:
         return !!(permissions?.admin || permissions?.canManageMetadataConfig);
       case SettingsTab.ApplicationSettings:
         return !!(permissions?.admin || permissions?.canManageGlobalPreferences);

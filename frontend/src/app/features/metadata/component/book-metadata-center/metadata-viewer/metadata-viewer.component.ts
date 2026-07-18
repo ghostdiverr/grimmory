@@ -39,6 +39,8 @@ import {AuthorService} from '../../../../author-browser/service/author.service';
 import {LanguageOption, LanguageService} from '../../../../../shared/services/language.service';
 import {Dialog} from 'primeng/dialog';
 import {Checkbox} from 'primeng/checkbox';
+import {DialogLauncherService} from '../../../../../shared/services/dialog-launcher.service';
+import {AcquisitionCategory, AcquisitionSearchSeed} from '../../../../acquisition/model/acquisition.model';
 import DOMPurify from 'dompurify';
 
 
@@ -112,12 +114,15 @@ export class MetadataViewerComponent implements OnInit, AfterViewChecked {
   private appSettingsService = inject(AppSettingsService);
   private confirmationService = inject(ConfirmationService);
   private languageService = inject(LanguageService);
+  private dialogLauncherService = inject(DialogLauncherService);
 
   private router = inject(Router);
   private destroyRef = inject(DestroyRef);
   private dialogRef = inject(DynamicDialogRef, { optional: true });
   private userState = this.userService.currentUser;
   private appSettings = this.appSettingsService.appSettings;
+
+  readonly prowlarrEnabled = computed(() => this.appSettings()?.prowlarrSettings?.enabled ?? false);
 
   private navigateAfterDialogClose(navigate: () => void): void {
     if (this.metadataCenterViewMode !== 'dialog') {
@@ -480,11 +485,6 @@ export class MetadataViewerComponent implements OnInit, AfterViewChecked {
 
   ngOnInit(): void {
     this.languageService.getLanguages().subscribe(langs => this.languageOptions = langs);
-    this.destroyRef.onDestroy(() => this.coverImage?.closePreview());
-
-    const onPopState = () => this.coverImage?.closePreview();
-    window.addEventListener('popstate', onPopState);
-    this.destroyRef.onDestroy(() => window.removeEventListener('popstate', onPopState));
 
     const user = this.userService.currentUser();
     if (user) {
@@ -666,6 +666,19 @@ export class MetadataViewerComponent implements OnInit, AfterViewChecked {
     setTimeout(() => {
       this.isAutoFetching = false;
     }, 15000);
+  }
+
+  openAcquisitionSearch(book: Book): void {
+    const category: AcquisitionCategory = book.primaryFile?.bookType === 'AUDIOBOOK' ? 'AUDIOBOOK' : 'BOOK';
+    const seed: AcquisitionSearchSeed = {
+      title: book.metadata?.title,
+      author: book.metadata?.authors?.[0],
+      isbn: book.metadata?.isbn13 ?? book.metadata?.isbn10,
+      category,
+      bookId: book.id,
+    };
+
+    void this.dialogLauncherService.openAcquisitionSearchDialog(seed);
   }
 
   quickSend(book: Book) {

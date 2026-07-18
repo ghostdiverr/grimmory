@@ -25,6 +25,7 @@ public enum AppSettingKey {
     QUICK_BOOK_MATCH                    ("quick_book_match",                     true,  false, List.of(PermissionType.ADMIN, PermissionType.MANAGE_METADATA_CONFIG)),
     LIBRARY_METADATA_REFRESH_OPTIONS    ("library_metadata_refresh_options",     true,  false, List.of(PermissionType.ADMIN, PermissionType.MANAGE_METADATA_CONFIG)),
     METADATA_PROVIDER_SETTINGS          ("metadata_provider_settings",           true,  false, List.of(PermissionType.ADMIN, PermissionType.MANAGE_METADATA_CONFIG)),
+    PROWLARR_SETTINGS                   ("prowlarr_settings",                    true,  false, List.of(PermissionType.ADMIN, PermissionType.MANAGE_METADATA_CONFIG)),
     METADATA_MATCH_WEIGHTS              ("metadata_match_weights",               true,  false, List.of(PermissionType.ADMIN, PermissionType.MANAGE_METADATA_CONFIG)),
     METADATA_PERSISTENCE_SETTINGS       ("metadata_persistence_settings_v2",     true,  false, List.of(PermissionType.ADMIN, PermissionType.MANAGE_METADATA_CONFIG)),
     METADATA_PUBLIC_REVIEWS_SETTINGS    ("metadata_public_reviews_settings",     true,  false, List.of(PermissionType.ADMIN, PermissionType.MANAGE_METADATA_CONFIG)),

@@ -1,0 +1,39 @@
+{
+  "searchDialog": {
+    "title": "Search & Download",
+    "description": "Search indexers for a release and grab it directly into your library",
+    "searchPlaceholder": "Search by title, author, or ISBN",
+    "searchBtn": "Search",
+    "categoryBook": "Book",
+    "categoryAudiobook": "Audiobook",
+    "columnSeeders": "Seeders",
+    "columnSize": "Size",
+    "columnIndexer": "Indexer",
+    "columnQuality": "Quality",
+    "columnTitle": "Release",
+    "grabBtn": "Grab",
+    "grabbedLabel": "Grabbed",
+    "noResults": "No releases found for this search",
+    "readyToSearch": "Enter a search term and press Search to find releases",
+    "toast": {
+      "searchErrorSummary": "Search failed",
+      "searchErrorDetail": "Could not search indexers. Please try again.",
+      "grabSuccessSummary": "Release grabbed",
+      "grabSuccessDetail": "\"{{title}}\" was sent for download ({{status}})",
+      "grabErrorSummary": "Grab failed",
+      "grabErrorDetail": "Could not grab \"{{title}}\". Please try again."
+    }
+  },
+  "tray": {
+    "categoryBook": "Book",
+    "categoryAudiobook": "Audiobook",
+    "dismissBtn": "Dismiss",
+    "statusGrabbed": "Grabbed",
+    "statusWaitingForFile": "Waiting for file",
+    "statusNormalizing": "Normalizing",
+    "statusImporting": "Importing",
+    "statusCompleted": "Completed",
+    "statusFailed": "Failed",
+    "statusTimedOut": "Timed out"
+  }
+}

@@ -20,6 +20,8 @@ import {CommandPaletteComponent} from './features/command-palette/command-palett
 import {CommandPaletteService} from './features/command-palette/command-palette.service';
 import {LibraryImportProgressService} from './shared/service/library-import-progress.service';
 import {AuthorService} from './features/author-browser/service/author.service';
+import {AcquisitionProgressService} from './shared/service/acquisition-progress.service';
+import {AcquisitionJobDto} from './features/acquisition/model/acquisition.model';
 
 @Component({
   selector: 'app-root',
@@ -42,6 +44,7 @@ export class AppComponent implements OnInit, OnDestroy {
   private rxStompService = inject(RxStompService);
   private notificationEventService = inject(NotificationEventService);
   private metadataProgressService = inject(MetadataProgressService);
+  private acquisitionProgressService = inject(AcquisitionProgressService);
   private bookdropFileService = inject(BookdropFileService);
   private taskService = inject(TaskService);
   private libraryHealthService = inject(LibraryHealthService);
@@ -165,6 +168,11 @@ export class AppComponent implements OnInit, OnDestroy {
     this.subscriptions.push(
       this.rxStompService.watch('/user/queue/session-revoked').subscribe(() => {
         this.authService.forceLogout('session_revoked');
+      })
+    );
+    this.subscriptions.push(
+      this.rxStompService.watch('/user/queue/acquisition-job-update').subscribe(msg => {
+        this.acquisitionProgressService.handleIncomingUpdate(JSON.parse(msg.body) as AcquisitionJobDto);
       })
     );
   }

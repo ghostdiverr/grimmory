@@ -1,0 +1,107 @@
+<div class="acquisition-search-dialog" *transloco="let t; prefix: 'acquisition.searchDialog'">
+  <div class="panel-header">
+    <div class="header-icon-wrapper">
+      <i class="pi pi-cloud-download header-icon"></i>
+    </div>
+    <div class="header-text">
+      <h2 class="panel-title">{{ t('title') }}</h2>
+      <p class="panel-description">{{ t('description') }}</p>
+    </div>
+    <p-button
+      icon="pi pi-times"
+      [rounded]="true"
+      [text]="true"
+      severity="secondary"
+      (onClick)="close()"
+      class="close-button">
+    </p-button>
+  </div>
+
+  <div class="search-bar">
+    <input
+      pInputText
+      type="text"
+      class="search-input"
+      [ngModel]="query()"
+      (ngModelChange)="onQueryChange($event)"
+      (keydown.enter)="onSearch()"
+      [placeholder]="t('searchPlaceholder')" />
+
+    <p-selectButton
+      [options]="categoryOptions"
+      [ngModel]="category()"
+      (ngModelChange)="onCategoryChange($event)"
+      optionLabel="label"
+      optionValue="value">
+    </p-selectButton>
+
+    <p-button
+      [label]="t('searchBtn')"
+      icon="pi pi-search"
+      [loading]="loading()"
+      (onClick)="onSearch()">
+    </p-button>
+  </div>
+
+  <div class="results-section">
+    <p-table
+      [value]="results()"
+      [loading]="loading()"
+      [sortField]="sortField"
+      [sortOrder]="sortOrder"
+      styleClass="p-datatable-sm p-datatable-striped"
+      [scrollable]="true">
+      <ng-template pTemplate="header">
+        <tr>
+          <th pSortableColumn="seeders" style="width: 90px">
+            {{ t('columnSeeders') }}
+            <p-sortIcon field="seeders"></p-sortIcon>
+          </th>
+          <th pSortableColumn="size" style="width: 100px">
+            {{ t('columnSize') }}
+            <p-sortIcon field="size"></p-sortIcon>
+          </th>
+          <th style="width: 160px">{{ t('columnIndexer') }}</th>
+          <th style="width: 140px">{{ t('columnQuality') }}</th>
+          <th>{{ t('columnTitle') }}</th>
+          <th style="width: 130px"></th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-release>
+        <tr>
+          <td>{{ release.seeders ?? '-' }}</td>
+          <td>{{ formatBytes(release.size) }}</td>
+          <td [pTooltip]="release.indexerName" tooltipPosition="top">{{ release.indexerName }}</td>
+          <td>{{ parseReleaseQuality(release.title) || '-' }}</td>
+          <td class="title-cell" [pTooltip]="release.title" tooltipPosition="top">{{ release.title }}</td>
+          <td>
+            @if (isGrabbed(release)) {
+              <span class="grabbed-badge">
+                <i class="pi pi-check"></i>
+                {{ t('grabbedLabel') }}
+              </span>
+            } @else {
+              <p-button
+                [label]="t('grabBtn')"
+                icon="pi pi-download"
+                size="small"
+                [loading]="isGrabbing(release)"
+                (onClick)="grab(release)">
+              </p-button>
+            }
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="6" class="empty-message">
+            <i class="pi pi-inbox"></i>
+            <span>{{ searched() ? t('noResults') : t('readyToSearch') }}</span>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+</div>

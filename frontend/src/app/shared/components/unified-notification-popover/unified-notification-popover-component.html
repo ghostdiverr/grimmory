@@ -9,4 +9,7 @@
   @if (hasPendingBookdropFiles()) {
     <app-bookdrop-files-widget-component/>
   }
+  @if (hasActiveAcquisitionJobs()) {
+    <app-acquisition-job-widget/>
+  }
 </div>

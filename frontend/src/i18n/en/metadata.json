@@ -311,6 +311,8 @@
     "fetchMetadataBtn": "Fetch Metadata",
     "fetchingBtn": "Fetching...",
     "fetchMetadataTooltip": "Quickly refresh metadata using your default fetch settings",
+    "searchDownloadBtn": "Search & Download",
+    "searchDownloadTooltip": "Search indexers for a release to download",
     "goToPreviousBook": "Go to Previous Book",
     "goToNextBook": "Go to Next Book",
     "personalRating": "Personal Rating",

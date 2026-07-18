@@ -34,6 +34,7 @@ public class AppSettings {
     private MetadataPersistenceSettings metadataPersistenceSettings;
     private MetadataPublicReviewsSettings metadataPublicReviewsSettings;
     private KoboSettings koboSettings;
+    private ProwlarrSettings prowlarrSettings;
     private CoverCroppingSettings coverCroppingSettings;
     private MetadataProviderSpecificFields metadataProviderSpecificFields;
     private Integer oidcSessionDurationHours;

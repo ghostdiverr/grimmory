@@ -1,0 +1,200 @@
+@use '../../../../../shared/styles/settings-shared' as settings;
+
+.main-container {
+  width: 100%;
+  padding: 0.875rem;
+  overflow-y: auto;
+}
+
+@include settings.settings-page-header;
+
+.settings-title {
+  @include settings.settings-page-title;
+
+  margin-bottom: 0.6563rem;
+}
+
+.settings-description {
+  @include settings.settings-page-description;
+}
+
+.settings-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+  margin-top: 1.3125rem;
+
+  @media (width <= 768px) {
+    padding-left: 0;
+  }
+}
+
+.preferences-section {
+  @media (width <= 768px) {
+    padding: 0;
+  }
+}
+
+.section-header {
+  @include settings.settings-section-header;
+
+  margin-bottom: 0.875rem;
+  margin-left: 0.875rem;
+  margin-right: 0.875rem;
+}
+
+.section-title {
+  @include settings.settings-section-title;
+
+  margin: 0 0 0.4375rem;
+}
+
+.section-description {
+  @include settings.settings-section-description;
+}
+
+.settings-card {
+  @include settings.settings-card;
+
+  padding: 0.875rem 1.3125rem 1.3125rem;
+  margin-left: 0.875rem;
+  margin-right: 0.875rem;
+
+  @media (width <= 768px) {
+    padding: 0.875rem;
+    margin-left: 0;
+    margin-right: 0;
+  }
+}
+
+.setting-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.75rem;
+  padding: 0.4375rem 0;
+
+  &:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  @media (width <= 768px) {
+    flex-direction: column;
+    gap: 0.875rem;
+    padding: 0.4375rem 0;
+  }
+}
+
+.setting-info {
+  flex: 1;
+  min-width: 0;
+
+  .setting-label {
+    display: block;
+    font-weight: settings.$settings-section-title-weight;
+    color: var(--p-text-color);
+    font-size: var(--app-text-base);
+    margin-bottom: 0.4375rem;
+  }
+
+  .setting-label-row {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    margin-bottom: 0.4375rem;
+    flex-wrap: wrap;
+
+    .setting-label {
+      margin-bottom: 0;
+      flex-shrink: 0;
+      min-width: 150px;
+    }
+
+    .token-input-group {
+      flex: 1;
+      min-width: 300px;
+      max-width: 500px;
+
+      @media (width <= 768px) {
+        min-width: 250px;
+        max-width: 100%;
+      }
+    }
+  }
+
+  .setting-description {
+    color: var(--p-text-muted-color);
+    font-size: settings.$settings-section-description-size;
+    line-height: 1.5;
+    margin: 0;
+  }
+}
+
+.token-input-group {
+  display: flex;
+  align-items: center;
+  gap: 0.6563rem;
+  width: 100%;
+
+  .token-input {
+    flex: 1;
+    min-width: 200px;
+
+    @media (width <= 768px) {
+      min-width: 150px;
+    }
+  }
+}
+
+.token-input {
+  width: 100%;
+  max-width: 500px;
+
+  @media (width <= 768px) {
+    max-width: 100%;
+  }
+}
+
+.advanced-toggle {
+  padding: 0.4375rem 0;
+}
+
+.advanced-toggle-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4375rem;
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--primary-color);
+  font-size: settings.$settings-section-description-size;
+  font-weight: settings.$settings-label-weight;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.advanced-section {
+  display: flex;
+  flex-direction: column;
+  padding: 0.4375rem 0 0;
+}
+
+.setting-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6563rem;
+  padding-top: 0.875rem;
+  margin-top: 0.4375rem;
+  border-top: 1px solid var(--p-content-border-color);
+}
+
+.access-denied-card {
+  @include settings.settings-access-denied-card;
+}
+
+.access-denied-content {
+  @include settings.settings-access-denied-content;
+}

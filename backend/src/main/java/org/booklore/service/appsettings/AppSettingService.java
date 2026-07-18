@@ -81,6 +81,7 @@ public class AppSettingService {
         AuditAction action = switch (key) {
             case AppSettingKey k when k == AppSettingKey.OIDC_FORCE_ONLY_MODE -> AuditAction.OIDC_FORCE_ONLY_MODE_CHANGED;
             case AppSettingKey k when k.name().startsWith("OIDC_") -> AuditAction.OIDC_CONFIG_CHANGED;
+            case AppSettingKey k when k == AppSettingKey.PROWLARR_SETTINGS -> AuditAction.PROWLARR_SETTINGS_UPDATED;
             default -> AuditAction.SETTINGS_UPDATED;
         };
         auditService.log(action, "Updated setting: " + key);
@@ -219,6 +220,7 @@ public class AppSettingService {
         builder.metadataPersistenceSettings(settingPersistenceHelper.getJsonSetting(settingsMap, AppSettingKey.METADATA_PERSISTENCE_SETTINGS, MetadataPersistenceSettings.class, settingPersistenceHelper.getDefaultMetadataPersistenceSettings(), true));
         builder.metadataPublicReviewsSettings(settingPersistenceHelper.getJsonSetting(settingsMap, AppSettingKey.METADATA_PUBLIC_REVIEWS_SETTINGS, MetadataPublicReviewsSettings.class, settingPersistenceHelper.getDefaultMetadataPublicReviewsSettings(), true));
         builder.koboSettings(settingPersistenceHelper.getJsonSetting(settingsMap, AppSettingKey.KOBO_SETTINGS, KoboSettings.class, settingPersistenceHelper.getDefaultKoboSettings(), true));
+        builder.prowlarrSettings(settingPersistenceHelper.getJsonSetting(settingsMap, AppSettingKey.PROWLARR_SETTINGS, ProwlarrSettings.class, settingPersistenceHelper.getDefaultProwlarrSettings(), true));
         builder.coverCroppingSettings(settingPersistenceHelper.getJsonSetting(settingsMap, AppSettingKey.COVER_CROPPING_SETTINGS, CoverCroppingSettings.class, settingPersistenceHelper.getDefaultCoverCroppingSettings(), true));
         builder.metadataProviderSpecificFields(
             settingPersistenceHelper.getJsonSetting(

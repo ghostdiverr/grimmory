@@ -52,6 +52,7 @@ function buildAppSettings(overrides: Partial<AppSettings> = {}): AppSettings {
     },
     maxFileUploadSizeInMb: 50,
     metadataProviderSettings: {} as never,
+    prowlarrSettings: {} as never,
     metadataMatchWeights: {} as never,
     metadataPersistenceSettings: {} as never,
     metadataPublicReviewsSettings: {

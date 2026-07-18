@@ -1,0 +1,227 @@
+<ng-container *transloco="let t; prefix: 'settingsDevice'">
+<p-toast position="top-right"></p-toast>
+
+<div class="main-container">
+  <div class="settings-header">
+    <h2 class="settings-title">
+      <i class="pi pi-cloud-download"></i>
+      {{ t('prowlarr.title') }}
+      <app-external-doc-link docType="prowlarr"></app-external-doc-link>
+    </h2>
+    <p class="settings-description">
+      {{ t('prowlarr.description') }}
+    </p>
+  </div>
+
+  @if (hasPermission()) {
+    <div class="settings-content">
+      <div class="preferences-section">
+        <div class="section-header">
+          <h3 class="section-title">
+            <i class="pi pi-server"></i>
+            {{ t('prowlarr.connectionConfig') }}
+          </h3>
+          <p class="section-description">
+            {{ t('prowlarr.connectionConfigDesc') }}
+          </p>
+        </div>
+
+        <div class="settings-card">
+          <div class="setting-item">
+            <div class="setting-info">
+              <div class="setting-label-row">
+                <span class="setting-label">{{ t('prowlarr.enabledLabel') }}</span>
+                <p-toggle-switch
+                  inputId="prowlarrEnabled"
+                  name="prowlarrEnabled"
+                  [(ngModel)]="enabled">
+                </p-toggle-switch>
+              </div>
+              <p class="setting-description">
+                {{ t('prowlarr.enabledDesc') }}
+              </p>
+            </div>
+          </div>
+
+          @if (enabled()) {
+            <div class="setting-item">
+              <div class="setting-info">
+                <div class="setting-label-row">
+                  <span class="setting-label">{{ t('prowlarr.baseUrl') }}</span>
+                  <input
+                    pInputText
+                    id="prowlarrBaseUrl"
+                    [(ngModel)]="baseUrl"
+                    name="prowlarrBaseUrl"
+                    class="token-input"
+                    [placeholder]="t('prowlarr.baseUrlPlaceholder')"/>
+                </div>
+                <p class="setting-description">{{ t('prowlarr.baseUrlDesc') }}</p>
+              </div>
+            </div>
+
+            <div class="setting-item">
+              <div class="setting-info">
+                <div class="setting-label-row">
+                  <span class="setting-label">{{ t('prowlarr.apiKey') }}</span>
+                  <div class="token-input-group">
+                    <input
+                      pInputText
+                      id="prowlarrApiKey"
+                      [(ngModel)]="apiKey"
+                      [type]="showApiKey() ? 'text' : 'password'"
+                      name="prowlarrApiKey"
+                      aria-label="{{ t('prowlarr.apiKey') }}"
+                      class="token-input"
+                      [placeholder]="t('prowlarr.apiKeyPlaceholder')"/>
+                    <p-button
+                      [icon]="showApiKey() ? 'pi pi-eye-slash' : 'pi pi-eye'"
+                      outlined="true"
+                      severity="info"
+                      size="small"
+                      (onClick)="toggleShowApiKey()">
+                    </p-button>
+                  </div>
+                </div>
+                <p class="setting-description">{{ t('prowlarr.apiKeyDesc') }}</p>
+              </div>
+            </div>
+
+            <div class="setting-item">
+              <div class="setting-info">
+                <div class="setting-label-row">
+                  <span class="setting-label">{{ t('prowlarr.completedDownloadsFolder') }}</span>
+                  <input
+                    pInputText
+                    id="prowlarrCompletedDownloadsFolder"
+                    [(ngModel)]="completedDownloadsFolder"
+                    name="prowlarrCompletedDownloadsFolder"
+                    class="token-input"
+                    [placeholder]="t('prowlarr.completedDownloadsFolderPlaceholder')"/>
+                </div>
+                <p class="setting-description">{{ t('prowlarr.completedDownloadsFolderDesc') }}</p>
+              </div>
+            </div>
+
+            <div class="setting-item">
+              <div class="setting-info">
+                <div class="setting-label-row">
+                  <span class="setting-label">{{ t('prowlarr.bookSubfolder') }}</span>
+                  <input
+                    pInputText
+                    id="prowlarrBookSubfolder"
+                    [(ngModel)]="bookSubfolder"
+                    name="prowlarrBookSubfolder"
+                    class="token-input"
+                    [placeholder]="t('prowlarr.bookSubfolderPlaceholder')"/>
+                </div>
+                <p class="setting-description">{{ t('prowlarr.bookSubfolderDesc') }}</p>
+              </div>
+            </div>
+
+            <div class="setting-item">
+              <div class="setting-info">
+                <div class="setting-label-row">
+                  <span class="setting-label">{{ t('prowlarr.audiobookSubfolder') }}</span>
+                  <input
+                    pInputText
+                    id="prowlarrAudiobookSubfolder"
+                    [(ngModel)]="audiobookSubfolder"
+                    name="prowlarrAudiobookSubfolder"
+                    class="token-input"
+                    [placeholder]="t('prowlarr.audiobookSubfolderPlaceholder')"/>
+                </div>
+                <p class="setting-description">{{ t('prowlarr.audiobookSubfolderDesc') }}</p>
+              </div>
+            </div>
+
+            <div class="advanced-toggle">
+              <button
+                type="button"
+                class="advanced-toggle-button"
+                (click)="toggleAdvanced()">
+                <i
+                  class="pi"
+                  [class.pi-chevron-down]="advancedExpanded()"
+                  [class.pi-chevron-right]="!advancedExpanded()">
+                </i>
+                {{ t('prowlarr.advancedTitle') }}
+              </button>
+            </div>
+
+            @if (advancedExpanded()) {
+              <div class="advanced-section">
+                <p class="setting-description">{{ t('prowlarr.advancedDesc') }}</p>
+
+                <div class="setting-item">
+                  <div class="setting-info">
+                    <div class="setting-label-row">
+                      <span class="setting-label">{{ t('prowlarr.bookCategories') }}</span>
+                      <input
+                        pInputText
+                        id="prowlarrBookCategories"
+                        [(ngModel)]="bookCategoriesText"
+                        name="prowlarrBookCategories"
+                        class="token-input"
+                        [placeholder]="t('prowlarr.categoriesPlaceholder')"/>
+                    </div>
+                    <p class="setting-description">{{ t('prowlarr.bookCategoriesDesc') }}</p>
+                  </div>
+                </div>
+
+                <div class="setting-item">
+                  <div class="setting-info">
+                    <div class="setting-label-row">
+                      <span class="setting-label">{{ t('prowlarr.audiobookCategories') }}</span>
+                      <input
+                        pInputText
+                        id="prowlarrAudiobookCategories"
+                        [(ngModel)]="audiobookCategoriesText"
+                        name="prowlarrAudiobookCategories"
+                        class="token-input"
+                        [placeholder]="t('prowlarr.categoriesPlaceholder')"/>
+                    </div>
+                    <p class="setting-description">{{ t('prowlarr.audiobookCategoriesDesc') }}</p>
+                  </div>
+                </div>
+              </div>
+            }
+          }
+
+          <div class="setting-actions">
+            <p-button
+              [label]="testingConnection() ? t('prowlarr.testingConnection') : t('prowlarr.testConnection')"
+              [icon]="testingConnection() ? 'pi pi-spin pi-spinner' : 'pi pi-bolt'"
+              [outlined]="true"
+              severity="info"
+              [disabled]="testingConnection() || !baseUrl() || !apiKey()"
+              (click)="testConnection()">
+            </p-button>
+            <p-button
+              [label]="t('prowlarr.save')"
+              icon="pi pi-save"
+              severity="success"
+              [outlined]="true"
+              (click)="saveSettings()">
+            </p-button>
+          </div>
+        </div>
+      </div>
+    </div>
+  } @else {
+    <div class="settings-content">
+      <div class="access-denied-card">
+        <i class="pi pi-lock"></i>
+        <div class="access-denied-content">
+          <h3>{{ t('accessRestricted') }}</h3>
+          <p>
+            {{ t('prowlarr.accessDenied') }}
+            <br>
+            {{ t('contactAdmin') }}
+          </p>
+        </div>
+      </div>
+    </div>
+  }
+</div>
+</ng-container>

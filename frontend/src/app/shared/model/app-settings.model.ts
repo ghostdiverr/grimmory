@@ -113,6 +113,17 @@ export interface Babelio {
   password: string;
 }
 
+export interface ProwlarrSettings {
+  enabled: boolean;
+  baseUrl: string;
+  apiKey: string;
+  bookCategories: number[];
+  audiobookCategories: number[];
+  completedDownloadsFolder: string;
+  bookSubfolder: string;
+  audiobookSubfolder: string;
+}
+
 export interface FormatWriteSettings {
   enabled: boolean;
   maxFileSizeInMb: number;
@@ -195,6 +206,7 @@ export interface AppSettings {
   oidcAutoProvisionDetails: OidcAutoProvisionDetails;
   maxFileUploadSizeInMb: number;
   metadataProviderSettings: MetadataProviderSettings;
+  prowlarrSettings: ProwlarrSettings;
   metadataMatchWeights: MetadataMatchWeights;
   metadataPersistenceSettings: MetadataPersistenceSettings;
   metadataPublicReviewsSettings: PublicReviewSettings;
@@ -245,6 +257,7 @@ export enum AppSettingKey {
   OIDC_AUTO_PROVISION_DETAILS = 'OIDC_AUTO_PROVISION_DETAILS',
   MAX_FILE_UPLOAD_SIZE_IN_MB = 'MAX_FILE_UPLOAD_SIZE_IN_MB',
   METADATA_PROVIDER_SETTINGS = 'METADATA_PROVIDER_SETTINGS',
+  PROWLARR_SETTINGS = 'PROWLARR_SETTINGS',
   METADATA_MATCH_WEIGHTS = 'METADATA_MATCH_WEIGHTS',
   METADATA_PERSISTENCE_SETTINGS = 'METADATA_PERSISTENCE_SETTINGS',
   METADATA_DOWNLOAD_ON_BOOKDROP = 'METADATA_DOWNLOAD_ON_BOOKDROP',

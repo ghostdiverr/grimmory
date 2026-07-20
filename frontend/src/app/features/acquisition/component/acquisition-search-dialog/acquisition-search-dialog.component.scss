@@ -69,19 +69,16 @@
       color: rgb(34 197 94);
     }
   }
+}
 
-  .empty-message {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 0.4375rem;
-    padding: 2.1875rem 0.875rem;
-    color: var(--text-secondary-color);
-    text-align: center;
+::ng-deep .p-datatable.p-datatable-sm .p-datatable-tbody > tr > td.empty-message {
+  padding: 2.1875rem 0.875rem;
+  color: var(--text-secondary-color);
+  text-align: center;
 
-    i {
-      font-size: 1.75rem;
-    }
+  i {
+    display: block;
+    margin-bottom: 0.4375rem;
+    font-size: 1.75rem;
   }
 }

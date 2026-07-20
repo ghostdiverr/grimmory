@@ -114,7 +114,9 @@ class ProwlarrRestClientTest {
         assertThat(capturedUri.toString()).startsWith(BASE_URL + "/api/v1/search");
         assertThat(capturedUri.getQuery()).contains("query=Foundation");
         assertThat(capturedUri.getQuery()).contains("type=search");
-        assertThat(capturedUri.getQuery()).contains("categories=7000,7020");
+        assertThat(capturedUri.getQuery()).contains("categories=7000");
+        assertThat(capturedUri.getQuery()).contains("categories=7020");
+        assertThat(capturedUri.getQuery()).doesNotContain("categories=7000,7020");
     }
 
     @Test

@@ -46,6 +46,18 @@
       </div>
       <div class="toolbar-actions">
         <div class="toolbar-icons">
+          @if (userService.currentUser(); as currentUser) {
+            @if ((currentUser.permissions.canEditMetadata || currentUser.permissions.admin) && prowlarrEnabled()) {
+              <a class="toolbar-item" role="button" tabindex="0" (click)="openAcquisitionSearch()" (keydown.enter)="openAcquisitionSearch()">
+                <i
+                  class="pi pi-cloud-download"
+                  [pTooltip]="t('tooltip.searchDownload')"
+                  tooltipPosition="top">
+                </i>
+              </a>
+            }
+          }
+
           @if (isFilterActive()) {
             <a class="toolbar-item" role="button" tabindex="0" (click)="clearFilter()" (keydown.enter)="clearFilter()">
               <i

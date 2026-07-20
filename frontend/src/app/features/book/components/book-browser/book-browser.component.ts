@@ -59,6 +59,8 @@ import {filterBooksByFilters} from './filters/sidebar-filter';
 import {LayoutService} from '../../../../shared/layout/layout.service';
 import {createGridDensity} from '../../../../shared/util/grid-density.util';
 import {DeferredRenderState} from './deferred-render-state';
+import {DialogLauncherService} from '../../../../shared/services/dialog-launcher.service';
+import {AcquisitionSearchSeed} from '../../../acquisition/model/acquisition.model';
 
 export enum EntityType {
   LIBRARY = 'Library',
@@ -99,6 +101,7 @@ export class BookBrowserComponent implements AfterViewInit {
   protected bookSelectionService = inject(BookSelectionService);
   protected appSettingsService = inject(AppSettingsService);
 
+  private dialogLauncherService = inject(DialogLauncherService);
   private activatedRoute = inject(ActivatedRoute);
   private messageService = inject(MessageService);
   private bookService = inject(BookService);
@@ -201,6 +204,7 @@ export class BookBrowserComponent implements AfterViewInit {
 
     return actions;
   });
+  readonly prowlarrEnabled = computed(() => this.appSettingsService.appSettings()?.prowlarrSettings?.enabled ?? false);
   // Deferred pipeline: heavy filter/sort runs in a setTimeout so the page chrome
   // and skeletons paint first, then real books replace them on the next task.
   private readonly forceExpandSeries = computed(() =>
@@ -873,6 +877,11 @@ export class BookBrowserComponent implements AfterViewInit {
       this.currentViewMode.set(mode);
       this.queryParamsService.updateViewMode(mode as 'grid' | 'table');
     }
+  }
+
+  openAcquisitionSearch(): void {
+    const seed: AcquisitionSearchSeed = {category: 'BOOK'};
+    void this.dialogLauncherService.openAcquisitionSearchDialog(seed);
   }
 
   unshelfBooks(): void {

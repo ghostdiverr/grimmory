@@ -329,8 +329,11 @@ public class SettingPersistenceHelper {
     public ProwlarrSettings getDefaultProwlarrSettings() {
         return ProwlarrSettings.builder()
                 .enabled(false)
-                .bookCategories(List.of())
-                .audiobookCategories(List.of())
+                // Standard Torznab categories (Books, Books/Ebook, Books/Comics, Audio/Audiobook).
+                // Prowlarr normalizes every indexer's own categories into this scheme, so these
+                // IDs work regardless of which indexers are configured.
+                .bookCategories(List.of(7000, 7020, 7030))
+                .audiobookCategories(List.of(3030))
                 .build();
     }
 

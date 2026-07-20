@@ -16,7 +16,6 @@ import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * HTTP client for Prowlarr's aggregated-indexer search/grab API.
@@ -57,7 +56,9 @@ public class ProwlarrRestClient implements ProwlarrClient {
                     .queryParam("query", query)
                     .queryParam("type", "search");
             if (categoryIds != null && !categoryIds.isEmpty()) {
-                uriBuilder.queryParam("categories", joinCategories(categoryIds));
+                // Prowlarr rejects a single comma-joined value (400 "not a valid value") -
+                // it expects one repeated `categories` param per ID.
+                uriBuilder.queryParam("categories", categoryIds.toArray());
             }
             URI uri = uriBuilder.build().toUri();
 
@@ -154,10 +155,6 @@ public class ProwlarrRestClient implements ProwlarrClient {
                 item.protocol(),
                 category
         );
-    }
-
-    private static String joinCategories(List<Integer> categoryIds) {
-        return categoryIds.stream().map(String::valueOf).collect(Collectors.joining(","));
     }
 
     private static boolean isBlank(String value) {

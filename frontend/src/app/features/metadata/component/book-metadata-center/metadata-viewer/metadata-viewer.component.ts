@@ -480,11 +480,6 @@ export class MetadataViewerComponent implements OnInit, AfterViewChecked {
 
   ngOnInit(): void {
     this.languageService.getLanguages().subscribe(langs => this.languageOptions = langs);
-    this.destroyRef.onDestroy(() => this.coverImage?.closePreview());
-
-    const onPopState = () => this.coverImage?.closePreview();
-    window.addEventListener('popstate', onPopState);
-    this.destroyRef.onDestroy(() => window.removeEventListener('popstate', onPopState));
 
     const user = this.userService.currentUser();
     if (user) {

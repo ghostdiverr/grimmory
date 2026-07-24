@@ -36,8 +36,9 @@ import magicShelf from './magic-shelf.json';
 import seriesBrowser from './series-browser.json';
 import authorBrowser from './author-browser.json';
 import acquisition from './acquisition.json';
+import wanted from './wanted.json';
 
 // To add a new domain: create the JSON file and add it here.
 // Settings tabs each get their own file: settings-email, settings-reader, settings-view, etc.
-const translations: Translation = {common, auth, nav, dashboard, settings, settingsEmail, settingsReader, settingsView, settingsMeta, settingsLibMeta, settingsApp, settingsUsers, settingsNaming, settingsOpds, settingsTasks, settingsAuditLogs, settingsAuth, settingsDevice, settingsProfile, app, shared, layout, libraryCreator, bookdrop, metadata, notebook, book, readerAudiobook, readerCbx, readerEbook, readerPdf, statsLibrary, statsUser, magicShelf, seriesBrowser, authorBrowser, acquisition};
+const translations: Translation = {common, auth, nav, dashboard, settings, settingsEmail, settingsReader, settingsView, settingsMeta, settingsLibMeta, settingsApp, settingsUsers, settingsNaming, settingsOpds, settingsTasks, settingsAuditLogs, settingsAuth, settingsDevice, settingsProfile, app, shared, layout, libraryCreator, bookdrop, metadata, notebook, book, readerAudiobook, readerCbx, readerEbook, readerPdf, statsLibrary, statsUser, magicShelf, seriesBrowser, authorBrowser, acquisition, wanted};
 export default translations;

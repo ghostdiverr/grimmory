@@ -18,7 +18,8 @@ public enum Topic {
     TASK_PROGRESS("/queue/task-progress"),
     LIBRARY_HEALTH("/topic/library-health"),
     SESSION_REVOKED("/queue/session-revoked"),
-    ACQUISITION_JOB_UPDATE("/queue/acquisition-job-update");
+    ACQUISITION_JOB_UPDATE("/queue/acquisition-job-update"),
+    WANTED_BOOK_UPDATE("/queue/wanted-book-update");
 
     private final String path;
 

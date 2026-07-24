@@ -66,6 +66,14 @@ public enum TaskType {
             false,
             "Acquisition Queue Scan",
             "Rescans the completed-downloads folder for newly finished acquisitions and times out stale in-progress acquisition jobs."
+    ),
+    WANTED_LIST_SCAN(
+            false,
+            false,
+            true,
+            false,
+            "Wanted List Scan",
+            "Searches Prowlarr for books on the wanted list and automatically grabs matching releases."
     );
 
     @Getter

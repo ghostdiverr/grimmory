@@ -26,6 +26,7 @@ import { AppVersion, VersionService } from '../../service/version.service';
 import { DialogLauncherService } from '../../services/dialog-launcher.service';
 import { LayoutService } from '../layout.service';
 import { AppThemeService } from '../../service/app-theme.service';
+import { AppSettingsService } from '../../service/app-settings.service';
 import type { AppearancePreference } from '../../model/app-state.model';
 
 import { AppSidebarComponent } from './app.sidebar.component';
@@ -126,6 +127,7 @@ describe('AppSidebarComponent', () => {
             setAppearancePreference,
           },
         },
+        { provide: AppSettingsService, useValue: { appSettings: signal(null) } },
       ],
     });
 

@@ -13,6 +13,7 @@ import { LibraryService } from '../book/service/library.service';
 import { ShelfService } from '../book/service/shelf.service';
 import { MagicShelfService } from '../magic-shelf/service/magic-shelf.service';
 import { UserService } from '../settings/user-management/user.service';
+import { AppSettingsService } from '../../shared/service/app-settings.service';
 import { NavItem } from '../../shared/layout/navigation/nav-item.model';
 import { buildAllNavPages, buildQuickActionNavItems } from '../../shared/layout/navigation/nav-catalog';
 import { UrlHelperService } from '../../shared/service/url-helper.service';
@@ -43,6 +44,7 @@ export class CommandPaletteService {
   private readonly router = inject(Router);
   private readonly t = inject(TranslocoService);
   private readonly userService = inject(UserService);
+  private readonly appSettingsService = inject(AppSettingsService);
   private readonly bookService = inject(BookService);
   private readonly shelfService = inject(ShelfService);
   private readonly magicShelfService = inject(MagicShelfService);
@@ -224,8 +226,10 @@ export class CommandPaletteService {
     this.activeLang();
     const user = this.userService.currentUser();
     if (!user) return [];
-    return buildAllNavPages(this.translate, user.permissions)
-      .map((item) => this.toPaletteNavItem(item, 'page'));
+    return buildAllNavPages(this.translate, {
+      ...user.permissions,
+      prowlarrEnabled: this.appSettingsService.appSettings()?.prowlarrSettings?.enabled ?? false,
+    }).map((item) => this.toPaletteNavItem(item, 'page'));
   });
 
   private readonly indexedShelves = computed<PaletteItem[]>(() =>

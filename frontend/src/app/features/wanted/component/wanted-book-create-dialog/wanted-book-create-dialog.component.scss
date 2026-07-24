@@ -1,0 +1,135 @@
+@use '../../../../shared/styles/panel-shared' as panel;
+
+.wanted-book-create-dialog {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.panel-header {
+  @include panel.panel-header;
+
+  flex-shrink: 0;
+}
+
+.form-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+  padding: 1.0938rem 1.3125rem;
+  background: var(--card-background);
+  border: 1px solid var(--border-color);
+  border-top: none;
+
+  .form-row {
+    display: flex;
+    gap: 0.875rem;
+
+    .form-field {
+      flex: 1;
+      min-width: 0;
+    }
+
+    @media (width <= 640px) {
+      flex-direction: column;
+    }
+  }
+
+  .form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4375rem;
+
+    label {
+      font-size: var(--app-text-sm);
+      font-weight: 500;
+      color: var(--text-color);
+    }
+  }
+
+  .metadata-search {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .search-results {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+    max-height: 12.5rem;
+    overflow-y: auto;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius, 6px);
+    padding: 0.375rem;
+  }
+
+  .search-result {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding: 0.375rem 0.5rem;
+    border-radius: var(--border-radius, 6px);
+    cursor: pointer;
+
+    &:hover,
+    &:focus-visible {
+      background: var(--surface-hover, rgba(0, 0, 0, 0.04));
+    }
+  }
+
+  .search-result-cover {
+    width: 2rem;
+    height: 2.75rem;
+    object-fit: cover;
+    border-radius: 3px;
+    flex-shrink: 0;
+
+    &.placeholder {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--surface-100, #f1f1f1);
+      color: var(--text-color-secondary);
+    }
+  }
+
+  .search-result-info {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .search-result-title {
+    font-size: var(--app-text-sm);
+    font-weight: 500;
+    color: var(--text-color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .search-result-meta {
+    font-size: var(--app-text-xs, 0.75rem);
+    color: var(--text-color-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .search-empty {
+    font-size: var(--app-text-sm);
+    color: var(--text-color-secondary);
+    margin: 0;
+  }
+}
+
+.dialog-footer {
+  @include panel.dialog-footer-end;
+}

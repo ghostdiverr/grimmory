@@ -278,7 +278,7 @@ export class MetadataSearcherComponent implements OnDestroy, OnChanges {
 
       const activeProviders = new Set<string>(providerKeys.map((p: string) => p.toLowerCase()));
 
-      this.bookMetadataService.fetchBookMetadata(fetchRequest.bookId, fetchRequest)
+      this.bookMetadataService.fetchBookMetadata(this.bookId, fetchRequest)
         .pipe(takeUntil(this.cancelRequest$))
         .subscribe({
           next: (metadata) => {

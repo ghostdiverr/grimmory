@@ -13,6 +13,14 @@ export class BookMetadataService {
   private authService = inject(AuthService);
 
   fetchBookMetadata(bookId: number, request: FetchMetadataRequest): Observable<BookMetadata> {
+    return this.streamMetadataRequest(`${this.url}/${bookId}/metadata/prospective`, request);
+  }
+
+  searchMetadata(request: FetchMetadataRequest): Observable<BookMetadata> {
+    return this.streamMetadataRequest(`${this.url}/metadata/search`, request);
+  }
+
+  private streamMetadataRequest(url: string, request: FetchMetadataRequest): Observable<BookMetadata> {
     const token = this.authService.getInternalAccessToken();
 
     if (!token) {
@@ -22,7 +30,7 @@ export class BookMetadataService {
     return new Observable<BookMetadata>((subscriber) => {
       const abortController = new AbortController();
 
-      fetch(`${this.url}/${bookId}/metadata/prospective`, {
+      fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

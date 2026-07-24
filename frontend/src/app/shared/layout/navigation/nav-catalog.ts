@@ -8,6 +8,7 @@ export interface ShellNavPermissions {
   canAccessLibraryStats?: boolean;
   canAccessUserStats?: boolean;
   canAccessBookdrop?: boolean;
+  prowlarrEnabled?: boolean;
 }
 
 export interface ShellActionHandlers {
@@ -54,6 +55,10 @@ function canAccessBookdrop(permissions: ShellNavPermissions): boolean {
 
 function canEditMetadata(permissions: ShellNavPermissions): boolean {
   return !!permissions.admin || !!permissions.canEditMetadata;
+}
+
+function canAccessWantedList(permissions: ShellNavPermissions): boolean {
+  return canEditMetadata(permissions) && !!permissions.prowlarrEnabled;
 }
 
 function canUploadBooks(permissions: ShellNavPermissions): boolean {
@@ -130,6 +135,13 @@ const SECONDARY_PAGE_DEFINITIONS: readonly PageDefinition[] = [
     icon: 'inbox',
     routerLink: ['/bookdrop'],
     isVisible: canAccessBookdrop,
+  },
+  {
+    id: 'wantedList',
+    labelKey: 'layout.menu.wantedList',
+    icon: 'list-plus',
+    routerLink: ['/wanted-list'],
+    isVisible: canAccessWantedList,
   },
 ] as const;
 

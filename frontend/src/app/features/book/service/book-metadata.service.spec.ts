@@ -120,6 +120,46 @@ describe('BookMetadataService', () => {
     expect(error?.message).toContain('HTTP error! status: 500');
   });
 
+  it('searches metadata providers over SSE without a bookId', async () => {
+    const searchRequest = {providers: ['Google'], title: 'Dune'};
+    const mockMetadata = {title: 'Dune'};
+    const encoder = new TextEncoder();
+    const dataChunk = encoder.encode(`data: ${JSON.stringify(mockMetadata)}\n`);
+
+    const mockReader = {
+      read: vi.fn()
+        .mockResolvedValueOnce({done: false, value: dataChunk})
+        .mockResolvedValueOnce({done: true, value: undefined}),
+      releaseLock: vi.fn()
+    };
+
+    const mockResponse = {
+      ok: true,
+      body: {
+        getReader: () => mockReader
+      }
+    };
+
+    const fetchSpy = vi.fn().mockResolvedValue(mockResponse);
+    vi.stubGlobal('fetch', fetchSpy);
+
+    let result: unknown;
+    service.searchMetadata(searchRequest).subscribe(value => {
+      result = value;
+    });
+
+    await new Promise(resolve => setTimeout(resolve, 0));
+
+    expect(fetchSpy).toHaveBeenCalledWith(
+      expect.stringMatching(/\/api\/v1\/books\/metadata\/search$/),
+      expect.objectContaining({
+        method: 'POST',
+        body: JSON.stringify(searchRequest)
+      })
+    );
+    expect(result).toEqual(mockMetadata);
+  });
+
   it('requests provider detail and ISBN lookup through HTTP endpoints', () => {
     service.fetchMetadataDetail('google', 'abc123').subscribe();
     service.lookupByIsbn('9780441172719').subscribe();

@@ -39,10 +39,13 @@ public class AcquisitionService {
 
     @Transactional
     public AcquisitionJobDto grab(GrabRequest request) {
+        return grab(request, authenticationService.getAuthenticatedUser().getId());
+    }
+
+    @Transactional
+    public AcquisitionJobDto grab(GrabRequest request, Long requestedByUserId) {
         ProwlarrReleaseDto release = request.release();
         prowlarrClient.grab(release);
-
-        Long requestedByUserId = authenticationService.getAuthenticatedUser().getId();
 
         AcquisitionJobEntity job = AcquisitionJobEntity.builder()
                 .bookId(request.bookId())

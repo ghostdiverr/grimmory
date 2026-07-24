@@ -22,6 +22,8 @@ import {LibraryImportProgressService} from './shared/service/library-import-prog
 import {AuthorService} from './features/author-browser/service/author.service';
 import {AcquisitionProgressService} from './shared/service/acquisition-progress.service';
 import {AcquisitionJobDto} from './features/acquisition/model/acquisition.model';
+import {WantedBookProgressService} from './shared/service/wanted-book-progress.service';
+import {WantedBookDto} from './features/wanted/model/wanted.model';
 
 @Component({
   selector: 'app-root',
@@ -45,6 +47,7 @@ export class AppComponent implements OnInit, OnDestroy {
   private notificationEventService = inject(NotificationEventService);
   private metadataProgressService = inject(MetadataProgressService);
   private acquisitionProgressService = inject(AcquisitionProgressService);
+  private wantedBookProgressService = inject(WantedBookProgressService);
   private bookdropFileService = inject(BookdropFileService);
   private taskService = inject(TaskService);
   private libraryHealthService = inject(LibraryHealthService);
@@ -173,6 +176,11 @@ export class AppComponent implements OnInit, OnDestroy {
     this.subscriptions.push(
       this.rxStompService.watch('/user/queue/acquisition-job-update').subscribe(msg => {
         this.acquisitionProgressService.handleIncomingUpdate(JSON.parse(msg.body) as AcquisitionJobDto);
+      })
+    );
+    this.subscriptions.push(
+      this.rxStompService.watch('/user/queue/wanted-book-update').subscribe(msg => {
+        this.wantedBookProgressService.handleIncomingUpdate(JSON.parse(msg.body) as WantedBookDto);
       })
     );
   }

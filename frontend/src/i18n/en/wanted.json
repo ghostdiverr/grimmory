@@ -1,0 +1,60 @@
+{
+  "title": "Wanted List",
+  "description": "Add books you don't have yet. Grimmory periodically searches Prowlarr and automatically grabs the best matching release.",
+  "addBtn": "Add to Wanted List",
+  "empty": "Your wanted list is empty. Add a book to have Grimmory search for it automatically.",
+  "columns": {
+    "title": "Title",
+    "author": "Author",
+    "category": "Category",
+    "status": "Status",
+    "library": "Library",
+    "lastSearched": "Last Searched",
+    "actions": "Actions"
+  },
+  "categoryBook": "Book",
+  "categoryAudiobook": "Audiobook",
+  "status": {
+    "active": "Searching",
+    "grabbed": "Grabbed",
+    "fulfilled": "Fulfilled",
+    "paused": "Paused"
+  },
+  "neverSearched": "Not searched yet",
+  "pauseBtn": "Pause",
+  "resumeBtn": "Resume",
+  "deleteBtn": "Remove",
+  "confirmDelete": {
+    "header": "Remove from Wanted List",
+    "message": "Remove \"{{title}}\" from your wanted list? This won't cancel an in-progress download."
+  },
+  "toast": {
+    "createSuccessSummary": "Added to Wanted List",
+    "createSuccessDetail": "\"{{title}}\" will be searched for automatically",
+    "createErrorSummary": "Could not add book",
+    "createErrorDetail": "Please try again.",
+    "pauseSuccessSummary": "Paused",
+    "resumeSuccessSummary": "Resumed",
+    "deleteSuccessSummary": "Removed",
+    "actionErrorSummary": "Action failed",
+    "actionErrorDetail": "Please try again.",
+    "loadErrorSummary": "Could not load wanted list",
+    "loadErrorDetail": "Please try again."
+  },
+  "createDialog": {
+    "title": "Add to Wanted List",
+    "titleLabel": "Title",
+    "titlePlaceholder": "Book title",
+    "authorLabel": "Author",
+    "authorPlaceholder": "Author name (optional)",
+    "isbnLabel": "ISBN",
+    "isbnPlaceholder": "ISBN (optional)",
+    "searchBtn": "Search metadata providers",
+    "searchNoResults": "No matches found.",
+    "categoryLabel": "Category",
+    "libraryLabel": "Library",
+    "libraryPlaceholder": "Select a library",
+    "cancelBtn": "Cancel",
+    "submitBtn": "Add"
+  }
+}

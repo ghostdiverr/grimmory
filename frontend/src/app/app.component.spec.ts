@@ -21,6 +21,7 @@ import { CommandPaletteService } from "./features/command-palette/command-palett
 import { LibraryImportProgressService } from "./shared/service/library-import-progress.service";
 import { AuthorService } from "./features/author-browser/service/author.service";
 import { AcquisitionProgressService } from "./shared/service/acquisition-progress.service";
+import { WantedBookProgressService } from "./shared/service/wanted-book-progress.service";
 
 interface StompMessage {
   body: string;
@@ -49,6 +50,7 @@ describe("AppComponent", () => {
   };
   let bookdropFileService: { handleIncomingFile: ReturnType<typeof vi.fn> };
   let acquisitionProgressService: { handleIncomingUpdate: ReturnType<typeof vi.fn> };
+  let wantedBookProgressService: { handleIncomingUpdate: ReturnType<typeof vi.fn> };
   let taskService: { handleTaskProgress: ReturnType<typeof vi.fn> };
   let libraryHealthService: { initWebsocket: ReturnType<typeof vi.fn>, fetchHealth: ReturnType<typeof vi.fn> };
   let authService: { forceLogout: ReturnType<typeof vi.fn>, isAuthenticated: ReturnType<typeof signal> };
@@ -91,6 +93,7 @@ describe("AppComponent", () => {
     metadataProgressService = { handleIncomingProgress: vi.fn() };
     bookdropFileService = { handleIncomingFile: vi.fn() };
     acquisitionProgressService = { handleIncomingUpdate: vi.fn() };
+    wantedBookProgressService = { handleIncomingUpdate: vi.fn() };
     taskService = { handleTaskProgress: vi.fn() };
     libraryHealthService = { initWebsocket: vi.fn(), fetchHealth: vi.fn() };
     authService = { forceLogout: vi.fn(), isAuthenticated: signal(auth.authenticated) };
@@ -124,6 +127,7 @@ describe("AppComponent", () => {
         { provide: MetadataProgressService, useValue: metadataProgressService },
         { provide: BookdropFileService, useValue: bookdropFileService },
         { provide: AcquisitionProgressService, useValue: acquisitionProgressService },
+        { provide: WantedBookProgressService, useValue: wantedBookProgressService },
         { provide: TaskService, useValue: taskService },
         { provide: LibraryHealthService, useValue: libraryHealthService },
         { provide: AuthService, useValue: authService },
@@ -213,6 +217,9 @@ describe("AppComponent", () => {
     topics
       .get("/user/queue/acquisition-job-update")
       ?.next({ body: JSON.stringify({ id: 5, status: "GRABBED" }) });
+    topics
+      .get("/user/queue/wanted-book-update")
+      ?.next({ body: JSON.stringify({ id: 6, status: "GRABBED" }) });
 
     expect(bookService.handleBookUpdate).toHaveBeenCalledWith({ id: 1 });
     expect(bookService.handleMultipleBookCoverPatches).toHaveBeenCalledWith([
@@ -238,6 +245,10 @@ describe("AppComponent", () => {
     });
     expect(acquisitionProgressService.handleIncomingUpdate).toHaveBeenCalledWith({
       id: 5,
+      status: "GRABBED",
+    });
+    expect(wantedBookProgressService.handleIncomingUpdate).toHaveBeenCalledWith({
+      id: 6,
       status: "GRABBED",
     });
   });

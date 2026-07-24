@@ -16,6 +16,7 @@ import { UrlHelperService } from '../../shared/service/url-helper.service';
 import { UserService } from '../settings/user-management/user.service';
 import { CustomSvgService } from '../../shared/services/custom-svg.service';
 import { DialogLauncherService } from '../../shared/services/dialog-launcher.service';
+import { AppSettingsService } from '../../shared/service/app-settings.service';
 
 import { CommandPaletteService } from './command-palette.service';
 
@@ -83,6 +84,7 @@ describe('CommandPaletteService', () => {
             openShelfCreatorDialog: vi.fn(() => Promise.resolve(null)),
           },
         },
+        { provide: AppSettingsService, useValue: { appSettings: signal(null) } },
       ],
     });
 

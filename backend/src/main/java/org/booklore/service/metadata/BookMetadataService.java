@@ -107,6 +107,20 @@ public class BookMetadataService {
         return getParser(provider).fetchMetadata(book, request);
     }
 
+    public Flux<BookMetadata> searchProspectiveMetadata(FetchMetadataRequest request) {
+        Book emptyBook = Book.builder().build();
+
+        return Flux.fromIterable(request.getProviders())
+                .flatMap(provider ->
+                    Flux.defer(() -> getParser(provider).fetchMetadataStream(emptyBook, request))
+                            .subscribeOn(Schedulers.boundedElastic())
+                            .onErrorResume(e -> {
+                                log.error("Error searching metadata from provider: {}", provider, e);
+                                return Flux.empty();
+                            })
+                );
+    }
+
 
     public BookMetadata lookupByIsbn(IsbnLookupRequest request) {
         List<MetadataProvider> providers = deriveProviderChainFromSettings();

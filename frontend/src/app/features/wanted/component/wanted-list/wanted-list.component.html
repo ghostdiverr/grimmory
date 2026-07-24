@@ -1,0 +1,92 @@
+<ng-container *transloco="let t; prefix: 'wanted'">
+  <div class="main-container">
+    <div class="settings-header">
+      <h2 class="settings-title">
+        <i class="pi pi-heart"></i>
+        {{ t('title') }}
+      </h2>
+      <p class="settings-description">{{ t('description') }}</p>
+    </div>
+
+    <div class="settings-card">
+      <div class="section-header">
+        <h3 class="section-title">
+          <i class="pi pi-list"></i>
+          {{ t('title') }}
+        </h3>
+        <p-button
+          [label]="t('addBtn')"
+          icon="pi pi-plus"
+          size="small"
+          (onClick)="openCreateDialog()">
+        </p-button>
+      </div>
+      <div class="section-body">
+        <p-table
+          [value]="entries()"
+          styleClass="p-datatable-sm p-datatable-striped">
+
+          <ng-template pTemplate="header">
+            <tr>
+              <th>{{ t('columns.title') }}</th>
+              <th style="width: 180px">{{ t('columns.author') }}</th>
+              <th style="width: 120px">{{ t('columns.category') }}</th>
+              <th style="width: 120px">{{ t('columns.status') }}</th>
+              <th style="width: 160px">{{ t('columns.library') }}</th>
+              <th style="width: 140px">{{ t('columns.lastSearched') }}</th>
+              <th style="width: 110px">{{ t('columns.actions') }}</th>
+            </tr>
+          </ng-template>
+
+          <ng-template pTemplate="body" let-entry>
+            <tr>
+              <td class="title-cell" [title]="entry.title">{{ entry.title }}</td>
+              <td>{{ entry.author || '—' }}</td>
+              <td>{{ entry.category === 'AUDIOBOOK' ? t('categoryAudiobook') : t('categoryBook') }}</td>
+              <td>
+                <app-tag [color]="statusColor(entry.status)" size="2xs" [rounded]="true">
+                  {{ t('status.' + entry.status.toLowerCase()) }}
+                </app-tag>
+              </td>
+              <td>{{ libraryName(entry) }}</td>
+              <td class="last-searched-cell">
+                {{ entry.lastSearchedAt ? (entry.lastSearchedAt | date:'short') : t('neverSearched') }}
+              </td>
+              <td class="actions-cell">
+                @if (canTogglePause(entry)) {
+                  <button
+                    type="button"
+                    class="icon-btn"
+                    [title]="entry.status === 'PAUSED' ? t('resumeBtn') : t('pauseBtn')"
+                    [disabled]="isPending(entry)"
+                    (click)="togglePause(entry)">
+                    <i class="pi" [class.pi-play]="entry.status === 'PAUSED'" [class.pi-pause]="entry.status !== 'PAUSED'"></i>
+                  </button>
+                }
+                <button
+                  type="button"
+                  class="icon-btn delete-btn"
+                  [title]="t('deleteBtn')"
+                  [disabled]="isPending(entry)"
+                  (click)="confirmDelete(entry)">
+                  <i class="pi pi-trash"></i>
+                </button>
+              </td>
+            </tr>
+          </ng-template>
+
+          <ng-template pTemplate="emptymessage">
+            <tr>
+              <td colspan="7" class="empty-message">
+                <i class="pi pi-heart"></i>
+                <span>{{ t('empty') }}</span>
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </div>
+    </div>
+  </div>
+
+  <p-confirmDialog></p-confirmDialog>
+</ng-container>

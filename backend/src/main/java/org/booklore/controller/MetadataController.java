@@ -44,6 +44,14 @@ public class MetadataController {
         return bookMetadataService.getProspectiveMetadataListForBookId(bookId, fetchMetadataRequest);
     }
 
+    @Operation(summary = "Search prospective metadata", description = "Search metadata providers by title/author/isbn without an existing book. Requires metadata edit permission or admin.")
+    @ApiResponse(responseCode = "200", description = "Prospective metadata returned successfully")
+    @PostMapping(value = "/metadata/search", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @PreAuthorize("@securityUtil.canEditMetadata() or @securityUtil.isAdmin()")
+    public Flux<BookMetadata> searchMetadata(@Parameter(description = "Fetch metadata request") @RequestBody FetchMetadataRequest fetchMetadataRequest) {
+        return bookMetadataService.searchProspectiveMetadata(fetchMetadataRequest);
+    }
+
     @Operation(summary = "Update book metadata", description = "Update metadata for a book. Requires metadata edit permission or admin.")
     @ApiResponse(responseCode = "200", description = "Metadata updated successfully")
     @PutMapping("/{bookId}/metadata")

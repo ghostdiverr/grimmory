@@ -39,6 +39,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
+import reactor.core.publisher.Flux;
 
 import java.util.*;
 
@@ -591,6 +592,53 @@ class BookMetadataServiceTest {
 
             assertThatThrownBy(() -> service.getProspectiveMetadataListForBookId(99L, request))
                     .isInstanceOf(APIException.class);
+        }
+    }
+
+    @Nested
+    class SearchProspectiveMetadata {
+
+        @Test
+        void searchesWithoutRequiringAnExistingBook() {
+            BookParser googleParser = mock(BookParser.class);
+            parserMap.put(MetadataProvider.Google, googleParser);
+
+            BookMetadata expected = BookMetadata.builder().title("Dune").build();
+            when(googleParser.fetchMetadataStream(eq(Book.builder().build()), any(FetchMetadataRequest.class)))
+                    .thenReturn(Flux.just(expected));
+
+            FetchMetadataRequest request = FetchMetadataRequest.builder()
+                    .title("Dune")
+                    .providers(List.of(MetadataProvider.Google))
+                    .build();
+
+            List<BookMetadata> result = service.searchProspectiveMetadata(request).collectList().block();
+
+            assertThat(result).containsExactly(expected);
+            verifyNoInteractions(bookRepository);
+        }
+
+        @Test
+        void mergesResultsFromMultipleProvidersAndIgnoresFailures() {
+            BookParser googleParser = mock(BookParser.class);
+            BookParser amazonParser = mock(BookParser.class);
+            parserMap.put(MetadataProvider.Google, googleParser);
+            parserMap.put(MetadataProvider.Amazon, amazonParser);
+
+            BookMetadata googleResult = BookMetadata.builder().title("Google Result").build();
+            when(googleParser.fetchMetadataStream(any(Book.class), any(FetchMetadataRequest.class)))
+                    .thenReturn(Flux.just(googleResult));
+            when(amazonParser.fetchMetadataStream(any(Book.class), any(FetchMetadataRequest.class)))
+                    .thenReturn(Flux.error(new RuntimeException("boom")));
+
+            FetchMetadataRequest request = FetchMetadataRequest.builder()
+                    .title("Dune")
+                    .providers(List.of(MetadataProvider.Google, MetadataProvider.Amazon))
+                    .build();
+
+            List<BookMetadata> result = service.searchProspectiveMetadata(request).collectList().block();
+
+            assertThat(result).containsExactly(googleResult);
         }
     }
 }

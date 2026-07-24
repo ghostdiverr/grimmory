@@ -1,0 +1,142 @@
+<div class="wanted-book-create-dialog" *transloco="let t; prefix: 'wanted.createDialog'">
+  <div class="panel-header">
+    <div class="header-icon-wrapper">
+      <i class="pi pi-heart header-icon"></i>
+    </div>
+    <div class="header-text">
+      <h2 class="panel-title">{{ t('title') }}</h2>
+    </div>
+    <p-button
+      icon="pi pi-times"
+      [rounded]="true"
+      [text]="true"
+      severity="secondary"
+      (onClick)="close()"
+      class="close-button">
+    </p-button>
+  </div>
+
+  <div class="form-body">
+    <div class="form-field">
+      <label for="wanted-title">{{ t('titleLabel') }}</label>
+      <input
+        id="wanted-title"
+        pInputText
+        type="text"
+        [ngModel]="title()"
+        (ngModelChange)="title.set($event)"
+        [placeholder]="t('titlePlaceholder')" />
+    </div>
+
+    <div class="form-field">
+      <label for="wanted-author">{{ t('authorLabel') }}</label>
+      <input
+        id="wanted-author"
+        pInputText
+        type="text"
+        [ngModel]="author()"
+        (ngModelChange)="author.set($event)"
+        [placeholder]="t('authorPlaceholder')" />
+    </div>
+
+    <div class="form-field">
+      <label for="wanted-isbn">{{ t('isbnLabel') }}</label>
+      <input
+        id="wanted-isbn"
+        pInputText
+        type="text"
+        [ngModel]="isbn()"
+        (ngModelChange)="isbn.set($event)"
+        [placeholder]="t('isbnPlaceholder')" />
+    </div>
+
+    @if (enabledProviders().length > 0) {
+      <div class="metadata-search">
+        <p-button
+          [label]="t('searchBtn')"
+          icon="pi pi-search"
+          severity="secondary"
+          [outlined]="true"
+          [disabled]="!canSearch()"
+          [loading]="searching()"
+          (onClick)="search()">
+        </p-button>
+
+        @if (searchResults().length > 0) {
+          <ul class="search-results">
+            @for (result of searchResults(); track $index) {
+              <li
+                class="search-result"
+                role="button"
+                tabindex="0"
+                (click)="pickSearchResult(result)"
+                (keydown.enter)="pickSearchResult(result)">
+                @if (result.thumbnailUrl) {
+                  <img class="search-result-cover" [src]="result.thumbnailUrl" alt="" />
+                } @else {
+                  <div class="search-result-cover placeholder"><i class="pi pi-book"></i></div>
+                }
+                <div class="search-result-info">
+                  <span class="search-result-title">{{ result.title }}</span>
+                  <span class="search-result-meta">
+                    {{ result.authors?.join(', ') }}
+                    @if (result.isbn13 || result.isbn10) {
+                      <span> · {{ result.isbn13 || result.isbn10 }}</span>
+                    }
+                  </span>
+                </div>
+              </li>
+            }
+          </ul>
+        } @else if (searchTriggered() && !searching()) {
+          <p class="search-empty">{{ t('searchNoResults') }}</p>
+        }
+      </div>
+    }
+
+    <div class="form-row">
+      <div class="form-field">
+        <label for="wanted-category">{{ t('categoryLabel') }}</label>
+        <p-selectButton
+          id="wanted-category"
+          [options]="categoryOptions"
+          [ngModel]="category()"
+          (ngModelChange)="category.set($event)"
+          optionLabel="label"
+          optionValue="value">
+        </p-selectButton>
+      </div>
+
+      <div class="form-field">
+        <label for="wanted-library">{{ t('libraryLabel') }}</label>
+        <p-select
+          id="wanted-library"
+          [options]="libraryOptions()"
+          [ngModel]="libraryId()"
+          (ngModelChange)="libraryId.set($event)"
+          optionLabel="label"
+          optionValue="value"
+          [placeholder]="t('libraryPlaceholder')">
+        </p-select>
+      </div>
+    </div>
+  </div>
+
+  <div class="dialog-footer">
+    <div class="footer-actions">
+      <p-button
+        [label]="t('cancelBtn')"
+        severity="secondary"
+        [text]="true"
+        (onClick)="close()">
+      </p-button>
+      <p-button
+        [label]="t('submitBtn')"
+        icon="pi pi-plus"
+        [disabled]="!canSubmit()"
+        [loading]="submitting()"
+        (onClick)="submit()">
+      </p-button>
+    </div>
+  </div>
+</div>

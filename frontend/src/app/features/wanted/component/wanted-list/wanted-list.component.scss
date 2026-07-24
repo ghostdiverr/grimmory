@@ -1,0 +1,104 @@
+@use '../../../../shared/styles/settings-shared' as settings;
+
+.main-container {
+  @include settings.settings-page-container;
+}
+
+@include settings.settings-page-header;
+
+.settings-title {
+  @include settings.settings-page-title;
+
+  margin-bottom: 0.6563rem;
+}
+
+.settings-description {
+  @include settings.settings-page-description;
+}
+
+.settings-card {
+  @include settings.settings-card;
+
+  gap: 0.875rem;
+}
+
+.section-header {
+  @include settings.settings-section-header;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.875rem;
+}
+
+.section-title {
+  @include settings.settings-section-title;
+}
+
+.section-body {
+  @include settings.settings-section-body;
+
+  padding-left: 0;
+}
+
+::ng-deep .p-datatable-table {
+  table-layout: fixed;
+}
+
+.title-cell {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.last-searched-cell {
+  font-size: var(--app-text-sm);
+  color: var(--p-text-muted-color);
+}
+
+.actions-cell {
+  display: flex;
+  gap: 0.4375rem;
+}
+
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border: 1px solid var(--p-content-border-color);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--p-text-muted-color);
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover:not(:disabled) {
+    background: var(--p-content-hover-background);
+    color: var(--p-text-color);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  &.delete-btn:hover:not(:disabled) {
+    color: rgb(239 68 68);
+    border-color: rgb(239 68 68 / 40%);
+  }
+}
+
+::ng-deep .p-datatable.p-datatable-sm .p-datatable-tbody > tr > td.empty-message {
+  text-align: center;
+  padding: 2.625rem 1.75rem;
+  color: var(--p-text-muted-color);
+
+  .pi {
+    display: block;
+    font-size: 1.75rem;
+    margin-bottom: 0.4375rem;
+  }
+}

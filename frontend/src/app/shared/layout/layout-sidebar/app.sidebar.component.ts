@@ -58,6 +58,7 @@ import { BookdropFileService } from '../../../features/bookdrop/service/bookdrop
 import { MetadataBatchStatus } from '../../model/metadata-batch-progress.model';
 import { LibraryImportProgressService } from '../../service/library-import-progress.service';
 import { AppThemeService } from '../../service/app-theme.service';
+import { AppSettingsService } from '../../service/app-settings.service';
 import type { AppearancePreference } from '../../model/app-state.model';
 import { APPEARANCE_OPTIONS } from '../theme/appearance-options';
 
@@ -180,6 +181,7 @@ export class AppSidebarComponent {
   private readonly bookdropFileService = inject(BookdropFileService);
   private readonly libraryImportProgressService = inject(LibraryImportProgressService);
   private readonly themeService = inject(AppThemeService);
+  private readonly appSettingsService = inject(AppSettingsService);
 
   readonly currentUser = this.userService.currentUser;
   private readonly allAuthors = this.authorService.allAuthors;
@@ -247,7 +249,10 @@ export class AppSidebarComponent {
         this.translate,
         { menuItems: this.libraryShelfMenuService },
       ),
-      ...buildToolsSection(this.translate, this.currentUser()?.permissions ?? {}),
+      ...buildToolsSection(this.translate, {
+        ...this.currentUser()?.permissions,
+        prowlarrEnabled: this.appSettingsService.appSettings()?.prowlarrSettings?.enabled ?? false,
+      }),
     ];
   });
 

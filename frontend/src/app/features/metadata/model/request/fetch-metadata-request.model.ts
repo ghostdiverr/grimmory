@@ -1,7 +1,7 @@
 export interface FetchMetadataRequest {
-  bookId: number,
+  bookId?: number,
   providers: string[],
-  title: string,
-  author: string,
-  isbn: string
+  title?: string,
+  author?: string,
+  isbn?: string
 }

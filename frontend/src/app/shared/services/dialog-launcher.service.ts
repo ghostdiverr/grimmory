@@ -255,4 +255,14 @@ export class DialogLauncherService {
       });
     });
   }
+
+  async openWantedBookCreateDialog(): Promise<DynamicDialogRef | null> {
+    return this.launchLazyDialog(async () => {
+      const {WantedBookCreateDialogComponent} = await import('../../features/wanted/component/wanted-book-create-dialog/wanted-book-create-dialog.component');
+      return this.openDialog(WantedBookCreateDialogComponent, {
+        showHeader: false,
+        styleClass: `${DialogSize.SM} ${DialogStyle.MINIMAL}`,
+      });
+    });
+  }
 }

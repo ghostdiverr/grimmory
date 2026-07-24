@@ -115,6 +115,27 @@ class AcquisitionServiceTest {
         assertThat(result).isSameAs(dto);
     }
 
+    @Test
+    void grab_withExplicitUserId_attributesJobToThatUserWithoutTouchingSecurityContext() {
+        acquisitionService = service();
+
+        AcquisitionJobEntity savedEntity = AcquisitionJobEntity.builder().id(99L).build();
+        when(acquisitionJobRepository.save(any(AcquisitionJobEntity.class))).thenReturn(savedEntity);
+
+        AcquisitionJobDto dto = new AcquisitionJobDto();
+        dto.setId(99L);
+        when(acquisitionJobMapper.toDto(savedEntity)).thenReturn(dto);
+
+        GrabRequest request = new GrabRequest(RELEASE, "Foundation", null, 6L);
+
+        acquisitionService.grab(request, 77L);
+
+        ArgumentCaptor<AcquisitionJobEntity> jobCaptor = ArgumentCaptor.forClass(AcquisitionJobEntity.class);
+        verify(acquisitionJobRepository, times(2)).save(jobCaptor.capture());
+        assertThat(jobCaptor.getAllValues().get(0).getRequestedByUserId()).isEqualTo(77L);
+        verifyNoInteractions(authenticationService);
+    }
+
     // ---- listJobs() ----
 
     @Test

@@ -1,5 +1,11 @@
 package org.booklore.service.browse;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
 import org.booklore.browse.BrowsePage;
 import org.booklore.browse.CursorCodec;
@@ -37,6 +43,7 @@ import java.util.stream.Collectors;
 public class BookBrowseService {
 
     private static final String PAGE_PATH = "/api/v1/books/page";
+    private static final String FACET_PATH = "/api/v1/books/facets";
     private static final int MAX_PAGE_SIZE = 100;
 
     private final AuthenticationService authenticationService;
@@ -46,6 +53,9 @@ public class BookBrowseService {
     private final BookSortRegistry sortRegistry;
     private final CursorCodec cursorCodec;
     private final LinksBuilder linksBuilder;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     public BrowsePage<Book> browse(String sort, List<String> facet, String facetLogicParam, String query, String cursor, Pageable pageable) {
         BookLoreUser user = authenticationService.getAuthenticatedUser();
@@ -86,9 +96,32 @@ public class BookBrowseService {
         CursorState baseState = new CursorState(offset, limit, sortString, paramsHash);
         String currentCursor = cursorCodec.encode(baseState);
         List<Link> links = linksBuilder.build(new LinksBuilder.Context(
-                PAGE_PATH, BrowseParams.preserved(facet, facetLogicParam, query), offset, limit, page.getTotalElements(), baseState));
+                PAGE_PATH, FACET_PATH, BrowseParams.preserved(facet, facetLogicParam, query), offset, limit, page.getTotalElements(), baseState));
 
         return BrowsePage.of(page.getContent(), offset, limit, page.getTotalElements(), currentCursor, links);
+    }
+
+    public List<Long> findAllIds(String sort, List<String> facet, String facetLogicParam, String query) {
+        BookLoreUser user = authenticationService.getAuthenticatedUser();
+        Long userId = user.getId();
+        boolean isAdmin = user.getPermissions().isAdmin();
+
+        Map<String, List<String>> facets = BookFilterSpecifications.parseFacets(facet);
+        FacetLogic facetLogic = FacetLogic.from(facetLogicParam);
+        List<SortTerm> sortTerms = SortParser.parse(sort, sortRegistry.registry().keys());
+        Specification<BookEntity> filter = filterSpecifications.base(query, facets, facetLogic, userId, isAdmin, BookFilterSpecifications.libraryIds(user), null);
+
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Long> cq = cb.createQuery(Long.class);
+        Root<BookEntity> root = cq.from(BookEntity.class);
+        cq.select(root.get("id"));
+        Predicate predicate = filter.toPredicate(root, cq, cb);
+        if (predicate != null) {
+            cq.where(predicate);
+        }
+        cq.orderBy(sortRegistry.registry().toOrders(sortTerms, root, cq, cb, userId));
+
+        return entityManager.createQuery(cq).getResultList();
     }
 
     public BrowsePage<Book> wrapLegacy(Page<Book> page, Pageable pageable) {
@@ -97,7 +130,7 @@ public class BookBrowseService {
         String paramsHash = ParamsHash.compute(null, Map.of(), FacetLogic.AND);
         CursorState baseState = new CursorState(offset, limit, null, paramsHash);
         List<Link> links = linksBuilder.build(new LinksBuilder.Context(
-                PAGE_PATH, "", offset, limit, page.getTotalElements(), baseState));
+                PAGE_PATH, FACET_PATH, "", offset, limit, page.getTotalElements(), baseState));
         return BrowsePage.of(page.getContent(), offset, limit, page.getTotalElements(), cursorCodec.encode(baseState), links);
     }
 

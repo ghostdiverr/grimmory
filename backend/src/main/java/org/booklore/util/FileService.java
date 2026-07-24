@@ -344,7 +344,6 @@ public class FileService {
                 }
             }
 
-
             log.debug("Downloading image from: {}", currentUrl);
 
             ResponseEntity<byte[]> response = noRedirectRestTemplate.exchange(

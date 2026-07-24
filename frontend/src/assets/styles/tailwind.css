@@ -28,6 +28,12 @@
 @utility slide-in-from-bottom-1 {
   --tw-enter-translate-y: 0.25rem;
 }
+@utility slide-in-from-bottom-full {
+  --tw-enter-translate-y: 100%;
+}
+@utility animate-in-sheet {
+  animation: enter 250ms cubic-bezier(0.32, 0.72, 0, 1);
+}
 
 @font-face {
   font-family: "Inter";

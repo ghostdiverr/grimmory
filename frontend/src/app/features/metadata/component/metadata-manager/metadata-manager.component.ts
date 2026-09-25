@@ -1,25 +1,23 @@
-import {ChangeDetectorRef, Component, effect, inject, OnDestroy, OnInit, signal} from '@angular/core';
-import {Tab, TabList, TabPanel, TabPanels, Tabs} from 'primeng/tabs';
-import {TableModule} from 'primeng/table';
-import {Button} from 'primeng/button';
-import {Checkbox} from 'primeng/checkbox';
-import {InputText} from 'primeng/inputtext';
-import {Dialog} from 'primeng/dialog';
-import {ConfirmationService, MessageService} from 'primeng/api';
+import {Component, effect, inject, OnDestroy, OnInit, signal} from '@angular/core';
+import {Tab, TabList, TabPanel, TabPanels, Tabs} from '@openng/optimus-ui/tabs';
+import {TableModule} from '@openng/optimus-ui/table';
+import {Button} from '@openng/optimus-ui/button';
+import {Checkbox} from '@openng/optimus-ui/checkbox';
+import {InputText} from '@openng/optimus-ui/inputtext';
+import {Dialog} from '@openng/optimus-ui/dialog';
+import {ConfirmationService, MessageService} from '@openng/optimus-ui/api';
 import {PageTitleService} from "../../../../shared/service/page-title.service";
 import {BookService} from '../../../book/service/book.service';
 import {BookMetadataManageService} from '../../../book/service/book-metadata-manage.service';
 import {Book} from '../../../book/model/book.model';
 import {FormsModule} from '@angular/forms';
-import {Tooltip} from 'primeng/tooltip';
-import {IconField} from 'primeng/iconfield';
-import {InputIcon} from 'primeng/inputicon';
+import {Tooltip} from '@openng/optimus-ui/tooltip';
+import {IconField} from '@openng/optimus-ui/iconfield';
+import {InputIcon} from '@openng/optimus-ui/inputicon';
 import {ActivatedRoute, Router} from '@angular/router';
 import {Subscription} from 'rxjs';
 import {ExternalDocLinkComponent} from '../../../../shared/components/external-doc-link/external-doc-link.component';
 import {TranslocoDirective, TranslocoPipe, TranslocoService} from '@jsverse/transloco';
-import {Select} from 'primeng/select';
-import {LanguageOption, LanguageService} from '../../../../shared/services/language.service';
 
 interface MetadataItem {
   value: string;
@@ -59,8 +57,7 @@ interface TabConfig {
     InputIcon,
     ExternalDocLinkComponent,
     TranslocoDirective,
-    TranslocoPipe,
-    Select
+    TranslocoPipe
   ],
   providers: [ConfirmationService],
   templateUrl: './metadata-manager.component.html',
@@ -74,11 +71,6 @@ export class MetadataManagerComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private pageTitle = inject(PageTitleService);
   private readonly t = inject(TranslocoService);
-  private readonly languageService = inject(LanguageService);
-  private readonly cdRef = inject(ChangeDetectorRef);
-
-  languageOptions: LanguageOption[] = [];
-  normalizing = signal(false);
 
   private routeSub!: Subscription;
   private readonly syncMetadataEffect = effect(() => {
@@ -150,10 +142,6 @@ export class MetadataManagerComponent implements OnInit, OnDestroy {
   ];
 
   ngOnInit() {
-    this.languageService.getLanguages().subscribe(langs => {
-      this.languageOptions = langs;
-      this.cdRef.detectChanges();
-    });
     this.routeSub = this.route.queryParams.subscribe(params => {
       const tabParam = params['tab'] as MetadataType;
       if (this.validTabs.includes(tabParam)) {
@@ -623,40 +611,6 @@ export class MetadataManagerComponent implements OnInit, OnDestroy {
 
   protected isSingleValueField(type: MetadataType): boolean {
     return type === 'series' || type === 'publishers' || type === 'languages';
-  }
-
-  getLanguageDisplay(code: string): string {
-    const found = this.languageOptions.find(l => l.code === code);
-    return found ? `${found.name} (${code})` : code;
-  }
-
-  isNormalizedLanguage(code: string): boolean {
-    return this.languageOptions.some(l => l.code === code);
-  }
-
-  normalizeAllLanguages(): void {
-    this.normalizing.set(true);
-    this.loading.set(true);
-    this.bookMetadataManageService.normalizeLanguages().subscribe({
-      next: () => {
-        this.normalizing.set(false);
-        this.loading.set(false);
-        this.messageService.add({
-          severity: 'success',
-          summary: this.t.translate('metadata.manager.toast.normalizeSuccessSummary'),
-          detail: this.t.translate('metadata.manager.toast.normalizeSuccessDetail')
-        });
-      },
-      error: () => {
-        this.normalizing.set(false);
-        this.loading.set(false);
-        this.messageService.add({
-          severity: 'error',
-          summary: this.t.translate('metadata.manager.toast.normalizeErrorSummary'),
-          detail: this.t.translate('metadata.manager.toast.normalizeErrorDetail')
-        });
-      }
-    });
   }
 
   protected getTotalAffectedBooks(items: MetadataItem[]): number {

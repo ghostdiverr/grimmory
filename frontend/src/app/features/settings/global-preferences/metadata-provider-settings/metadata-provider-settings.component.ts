@@ -1,15 +1,15 @@
 import {Component, DestroyRef, effect, inject} from '@angular/core';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {TableModule} from 'primeng/table';
-import {InputText} from 'primeng/inputtext';
-import {Button} from 'primeng/button';
+import {TableModule} from '@openng/optimus-ui/table';
+import {InputText} from '@openng/optimus-ui/inputtext';
+import {Button} from '@openng/optimus-ui/button';
 import {AppSettingsService} from '../../../../shared/service/app-settings.service';
-import {MessageService} from 'primeng/api';
+import {MessageService} from '@openng/optimus-ui/api';
 import {AppSettingKey} from '../../../../shared/model/app-settings.model';
-import {Select} from 'primeng/select';
+import {Select} from '@openng/optimus-ui/select';
 import {ExternalDocLinkComponent} from '../../../../shared/components/external-doc-link/external-doc-link.component';
-import { ToggleSwitch } from 'primeng/toggleswitch';
+import { ToggleSwitch } from '@openng/optimus-ui/toggleswitch';
 import {TranslocoDirective, TranslocoService} from '@jsverse/transloco';
 
 @Component({
@@ -82,6 +82,20 @@ export class MetadataProviderSettingsComponent {
     {label: 'audible.in', value: 'in'}
   ];
 
+  appleBooksCountries = [
+    {label: 'US', value: 'US'},
+    {label: 'CA', value: 'CA'},
+    {label: 'GB', value: 'GB'},
+    {label: 'DE', value: 'DE'},
+    {label: 'FR', value: 'FR'},
+    {label: 'PL', value: 'PL'},
+    {label: 'JP', value: 'JP'},
+    {label: 'AU', value: 'AU'},
+    {label: 'IT', value: 'IT'},
+    {label: 'ES', value: 'ES'},
+  ]
+
+  selectedAppleBooksCountry = 'US';
   selectedAudibleDomain = 'com';
   audibleEnabled: boolean = false;
 
@@ -89,6 +103,7 @@ export class MetadataProviderSettingsComponent {
   amazonCookie: string = '';
   hardcoverEnabled: boolean = false;
   amazonEnabled: boolean = false;
+  openLibraryEnabled: boolean = false;
   goodreadsEnabled: boolean = false;
   googleEnabled: boolean = false;
   comicvineEnabled: boolean = false;
@@ -101,6 +116,7 @@ export class MetadataProviderSettingsComponent {
   babelioEnabled: boolean = false;
   babelioUserLogin: string = '';
   babelioPassword: string = '';
+  appleBooksEnabled: boolean = false;
 
   private appSettingsService = inject(AppSettingsService);
   private messageService = inject(MessageService);
@@ -116,6 +132,7 @@ export class MetadataProviderSettingsComponent {
 
   private applySettings(settings: NonNullable<ReturnType<typeof this.appSettingsService.appSettings>>): void {
     const metadataProviderSettings = settings.metadataProviderSettings;
+    this.openLibraryEnabled = metadataProviderSettings?.openLibrary?.enabled ?? false;
     this.amazonEnabled = metadataProviderSettings?.amazon?.enabled ?? false;
     this.amazonCookie = metadataProviderSettings?.amazon?.cookie ?? "";
     this.selectedAmazonDomain = metadataProviderSettings?.amazon?.domain ?? 'com';
@@ -133,9 +150,11 @@ export class MetadataProviderSettingsComponent {
     this.ranobedbPreferRomaji = metadataProviderSettings?.ranobedb?.preferRomaji ?? false;
     this.audibleEnabled = metadataProviderSettings?.audible?.enabled ?? false;
     this.selectedAudibleDomain = metadataProviderSettings?.audible?.domain ?? 'com';
+    this.babelioEnabled = metadataProviderSettings?.babelio?.enabled ?? false;
     this.babelioUserLogin = metadataProviderSettings?.babelio?.userLogin ?? '';
     this.babelioPassword = metadataProviderSettings?.babelio?.password ?? '';
-    this.babelioEnabled = metadataProviderSettings?.babelio?.enabled ?? false;
+    this.appleBooksEnabled = metadataProviderSettings?.appleBooks?.enabled ?? false;
+    this.selectedAppleBooksCountry = metadataProviderSettings?.appleBooks?.country ?? 'US';
   }
 
   onTokenChange(newToken: string): void {
@@ -158,6 +177,9 @@ export class MetadataProviderSettingsComponent {
       {
         key: AppSettingKey.METADATA_PROVIDER_SETTINGS,
         newValue: {
+          openLibrary: {
+            enabled: this.openLibraryEnabled,
+          },
           amazon: {
             enabled: this.amazonEnabled,
             cookie: this.amazonCookie,
@@ -191,7 +213,11 @@ export class MetadataProviderSettingsComponent {
             enabled: this.babelioEnabled,
             userLogin: this.babelioUserLogin.trim(),
             password: this.babelioPassword.trim()
-          }
+          },
+          appleBooks: {
+            enabled: this.appleBooksEnabled,
+            country: this.selectedAppleBooksCountry,
+          },
         }
       }
     ];

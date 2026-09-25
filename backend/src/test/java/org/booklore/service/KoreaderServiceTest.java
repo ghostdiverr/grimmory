@@ -36,9 +36,9 @@ import org.springframework.security.core.context.*;
 import java.lang.reflect.Method;
 import java.nio.file.Path;
 import java.time.Instant;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -438,6 +438,25 @@ class KoreaderServiceTest {
     }
 
     @Test
+    void syncProgressToKoreader_usesGrimmoryDeviceInfo() {
+        BookEntity book = bookWithPrimaryFile(11L, BookFileType.PDF);
+        BookLoreUserEntity user = user(42L);
+        UserBookProgressEntity progress = new UserBookProgressEntity();
+        progress.setKoreaderDeviceId("EXAMPLE-ID");
+        progress.setKoreaderDevice("EXAMPLE-DEVICE");
+        when(koreaderUserRepo.findByBookLoreUserId(42L)).thenReturn(Optional.of(koreaderUser(true, true)));
+        when(bookRepo.findById(11L)).thenReturn(Optional.of(book));
+        when(userRepo.findById(42L)).thenReturn(Optional.of(user));
+        when(progressRepo.findByUserIdAndBookId(42L, 11L)).thenReturn(Optional.of(progress));
+
+        service.syncProgressToKoreader(11L, 50f, 42L);
+
+        assertEquals("Grimmory", progress.getKoreaderDevice());
+        assertEquals("Grimmory", progress.getKoreaderDeviceId());
+        verify(progressRepo).save(progress);
+    }
+
+    @Test
     void normalizeProgressPercent_handlesNullAndRanges() throws Exception {
         Method method = KoreaderService.class.getDeclaredMethod("normalizeProgressPercent", Float.class);
         method.setAccessible(true);
@@ -478,7 +497,7 @@ class KoreaderServiceTest {
         primaryFile.setBookType(bookFileType);
         primaryFile.setFileSubPath("subdir");
         primaryFile.setFileName("book.epub");
-        book.setBookFiles(List.of(primaryFile));
+        book.setBookFiles(Set.of(primaryFile));
         return book;
     }
 }

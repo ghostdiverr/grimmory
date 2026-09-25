@@ -384,6 +384,11 @@ public class BabelioBookParser implements BookParser, DetailedMetadataProvider {
 
     // ── Settings ─────────────────────────────────────────────────────────────
 
+    @Override
+    public boolean isEnabled() {
+        return getSettings() != null;
+    }
+
     private MetadataProviderSettings.Babelio getSettings() {
         MetadataProviderSettings.Babelio settings = appSettingService.getAppSettings()
                 .getMetadataProviderSettings().getBabelio();

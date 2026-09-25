@@ -1,27 +1,27 @@
 import {Component, computed, DestroyRef, effect, EventEmitter, inject, Input, Output} from '@angular/core';
 import {Book, BookMetadata, ComicMetadata, MetadataClearFlags, MetadataUpdateWrapper} from '../../../../book/model/book.model';
-import {MessageService} from 'primeng/api';
+import {MessageService} from '@openng/optimus-ui/api';
 import {CdkDragDrop, CdkDropList, CdkDrag, moveItemInArray} from '@angular/cdk/drag-drop';
-import {Button} from 'primeng/button';
+import {Button} from '@openng/optimus-ui/button';
 import {FormGroup, FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {InputText} from 'primeng/inputtext';
+import {InputText} from '@openng/optimus-ui/inputtext';
 import {forkJoin, Observable} from 'rxjs';
-import {Tooltip} from 'primeng/tooltip';
+import {Tooltip} from '@openng/optimus-ui/tooltip';
 import {UrlHelperService} from '../../../../../shared/service/url-helper.service';
 import {BookService} from '../../../../book/service/book.service';
 import {BookMetadataManageService} from '../../../../book/service/book-metadata-manage.service';
-import {Textarea} from 'primeng/textarea';
+import {Textarea} from '@openng/optimus-ui/textarea';
 
-import {AutoComplete, AutoCompleteSelectEvent} from 'primeng/autocomplete';
-import {Image} from 'primeng/image';
-import {Checkbox} from 'primeng/checkbox';
+import {AutoComplete, AutoCompleteSelectEvent} from '@openng/optimus-ui/autocomplete';
+import {Image} from '@openng/optimus-ui/image';
+import {Checkbox} from '@openng/optimus-ui/checkbox';
 import {LazyLoadImageModule} from 'ng-lazyload-image';
 import {AppSettingsService} from '../../../../../shared/service/app-settings.service';
 import {MetadataProviderSpecificFields} from '../../../../../shared/model/app-settings.model';
 import {ALL_COMIC_METADATA_FIELDS, ALL_METADATA_FIELDS, AUDIOBOOK_METADATA_FIELDS, COMIC_ARRAY_METADATA_FIELDS, COMIC_FORM_TO_MODEL_LOCK, COMIC_TEXT_METADATA_FIELDS, COMIC_TEXTAREA_METADATA_FIELDS, getArrayFields, getBookDetailsFields, getBottomFields, getProviderFields, getSeriesFields, getTextareaFields, getTopFields, MetadataFieldConfig, MetadataFormBuilder, MetadataUtilsService} from '../../../../../shared/metadata';
 import {TranslocoDirective, TranslocoService} from '@jsverse/transloco';
 import {LanguageOption, LanguageService} from '../../../../../shared/services/language.service';
-import {Select} from 'primeng/select';
+import {Select} from '@openng/optimus-ui/select';
 
 @Component({
   selector: 'app-metadata-picker',

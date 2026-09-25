@@ -8,9 +8,10 @@ import {
   viewChild,
 } from '@angular/core';
 import { type FormValueControl } from '@angular/forms/signals';
-import { Combobox, ComboboxInput } from '@angular/aria/combobox';
+import { Combobox } from '@angular/aria/combobox';
 import { LucideLoaderCircle } from '@lucide/angular';
 
+import { AppControlTransitionDirective } from '../control.styles';
 import { AppAutocompleteBaseDirective } from './app-autocomplete-base.directive';
 import { type AppAutocompleteOption } from './app-autocomplete-option';
 import { AppAutocompletePopupComponent } from './app-autocomplete-popup.component';
@@ -19,20 +20,16 @@ import { AppAutocompleteSelectedTagsComponent } from './app-autocomplete-selecte
 @Component({
   selector: 'app-multi-autocomplete',
   standalone: true,
-  imports: [Combobox, ComboboxInput, LucideLoaderCircle, AppAutocompletePopupComponent, AppAutocompleteSelectedTagsComponent],
+  imports: [Combobox, LucideLoaderCircle, AppAutocompletePopupComponent, AppAutocompleteSelectedTagsComponent, AppControlTransitionDirective],
   host: { class: 'block w-full' },
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div
-      ngCombobox
-      #cb="ngCombobox"
-      filterMode="manual"
-      [readonly]="readonly()"
-      [disabled]="disabled()"
-      class="relative block w-full">
+    <div class="relative block w-full">
       <div
+        appControlTransition
         #origin
         [class]="boxClass()"
+        (focusout)="markTouchedWhenFocusLeavesControl($event)"
         (pointerdown)="focusInputOnPointerdown($event, input)">
         @if (selectedTags().length) {
           <app-autocomplete-selected-tags
@@ -43,12 +40,15 @@ import { AppAutocompleteSelectedTagsComponent } from './app-autocomplete-selecte
             (remove)="removeChip($event)" />
         }
         <input
-          ngComboboxInput
+          ngCombobox
+          #cb="ngCombobox"
           #input
           type="text"
           autocomplete="off"
           spellcheck="false"
           [(value)]="query"
+          [readonly]="readonly()"
+          [disabled]="disabled()"
           [attr.id]="resolvedInputId()"
           [attr.name]="name() || null"
           [placeholder]="placeholderText()"
@@ -57,14 +57,11 @@ import { AppAutocompleteSelectedTagsComponent } from './app-autocomplete-selecte
           [attr.aria-readonly]="readonly() ? 'true' : null"
           [attr.aria-busy]="pending() ? 'true' : null"
           [attr.aria-describedby]="resolvedDescribedBy()"
-          [disabled]="disabled()"
           [required]="required()"
-          [readonly]="readonly()"
           (input)="onType(input.value)"
           (focus)="onInputFocus()"
           (keydown.enter)="onEnter($event)"
           (keydown.backspace)="onBackspace()"
-          (blur)="touched.set(true)"
           [class]="innerInputClass" />
         <svg
           lucideLoaderCircle
@@ -75,6 +72,7 @@ import { AppAutocompleteSelectedTagsComponent } from './app-autocomplete-selecte
       </div>
 
       <app-autocomplete-popup
+        [combobox]="cb"
         [origin]="origin"
         [open]="cb.expanded()"
         [disabled]="disabled()"
@@ -141,7 +139,6 @@ export class AppMultiAutocompleteComponent extends AppAutocompleteBaseDirective 
     const current = this.value();
     if (!current.length) return;
     this.value.set(current.slice(0, -1));
-    this.touched.set(true);
   }
 
   protected selectOption(option: AppAutocompleteOption): void {
@@ -151,7 +148,6 @@ export class AppMultiAutocompleteComponent extends AppAutocompleteBaseDirective 
   protected removeChip(value: string): void {
     this.chipLabels.delete(value);
     this.value.set(this.value().filter((existing) => existing !== value));
-    this.touched.set(true);
   }
 
   private addChip(option: AppAutocompleteOption): void {
@@ -164,7 +160,6 @@ export class AppMultiAutocompleteComponent extends AppAutocompleteBaseDirective 
     this.chipLabels.set(option.value, option.label);
     this.value.set([...current, option.value]);
     this.clearTagInput();
-    this.touched.set(true);
     this.complete.emit('');
   }
 

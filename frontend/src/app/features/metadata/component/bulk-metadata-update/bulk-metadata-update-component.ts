@@ -1,21 +1,19 @@
 import {Component, computed, effect, inject, Injector, OnInit} from '@angular/core';
 import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule} from '@angular/forms';
 
-import {InputText} from 'primeng/inputtext';
-import {Button} from 'primeng/button';
-import {Tooltip} from 'primeng/tooltip';
-import {DatePicker} from 'primeng/datepicker';
-import {DynamicDialogConfig, DynamicDialogRef} from 'primeng/dynamicdialog';
-import {MessageService} from 'primeng/api';
+import {InputText} from '@openng/optimus-ui/inputtext';
+import {Button} from '@openng/optimus-ui/button';
+import {Tooltip} from '@openng/optimus-ui/tooltip';
+import {DatePicker} from '@openng/optimus-ui/datepicker';
+import {DynamicDialogConfig, DynamicDialogRef} from '@openng/optimus-ui/dynamicdialog';
+import {MessageService} from '@openng/optimus-ui/api';
 import {BookService} from '../../../book/service/book.service';
 import {BookMetadataManageService} from '../../../book/service/book-metadata-manage.service';
 import {Book, BulkMetadataUpdateRequest} from '../../../book/model/book.model';
-import {Checkbox} from 'primeng/checkbox';
-import {AutoComplete} from 'primeng/autocomplete';
-import {AutoCompleteSelectEvent} from 'primeng/autocomplete';
-import {ProgressSpinner} from 'primeng/progressspinner';
-import {Select} from 'primeng/select';
-import {LanguageOption, LanguageService} from '../../../../shared/services/language.service';
+import {Checkbox} from '@openng/optimus-ui/checkbox';
+import {AutoComplete} from '@openng/optimus-ui/autocomplete';
+import {AutoCompleteSelectEvent} from '@openng/optimus-ui/autocomplete';
+import {ProgressSpinner} from '@openng/optimus-ui/progressspinner';
 
 @Component({
   selector: 'app-bulk-metadata-update-component',
@@ -29,9 +27,8 @@ import {LanguageOption, LanguageService} from '../../../../shared/services/langu
     DatePicker,
     Checkbox,
     ProgressSpinner,
-    AutoComplete,
-    Select
-  ],
+    AutoComplete
+],
   providers: [MessageService],
   templateUrl: './bulk-metadata-update-component.html',
   styleUrl: './bulk-metadata-update-component.scss'
@@ -66,10 +63,7 @@ export class BulkMetadataUpdateComponent implements OnInit {
   private readonly bookMetadataManageService = inject(BookMetadataManageService);
   private readonly messageService = inject(MessageService);
   private readonly injector = inject(Injector);
-  private readonly languageService = inject(LanguageService);
   private readonly uniqueMetadata = computed(() => this.bookService.uniqueMetadata());
-
-  languageOptions: LanguageOption[] = [];
 
   get allAuthors(): string[] { return this.uniqueMetadata().authors; }
   get allGenres(): string[] { return this.uniqueMetadata().categories; }
@@ -129,7 +123,6 @@ export class BulkMetadataUpdateComponent implements OnInit {
   ngOnInit(): void {
     this.bookIds = this.config.data?.bookIds ?? [];
     this.books = this.bookService.getBooksByIds(this.bookIds);
-    this.languageService.getLanguages().subscribe(langs => this.languageOptions = langs);
 
     this.metadataForm = this.fb.group({
       authors: [],

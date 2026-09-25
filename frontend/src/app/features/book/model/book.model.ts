@@ -167,6 +167,7 @@ export interface BookMetadata {
   seriesTotal?: number | null;
   isbn13?: string;
   isbn10?: string;
+  openlibraryId?: string;
   asin?: string;
   goodreadsId?: string;
   comicvineId?: string;
@@ -191,6 +192,9 @@ export interface BookMetadata {
   audibleRating?: number | null;
   audibleReviewCount?: number | null;
   babelioId?: string;
+  applebooksId?: string;
+  applebooksRating?: number | null;
+  applebooksReviewCount?: number | null;
   narrator?: string;
   abridged?: boolean | null;
   narratorLocked?: boolean;
@@ -218,6 +222,7 @@ export interface BookMetadata {
   seriesTotalLocked?: boolean;
   isbn13Locked?: boolean;
   isbn10Locked?: boolean;
+  openlibraryIdLocked?: boolean;
   asinLocked?: boolean;
   comicvineIdLocked?: boolean;
   goodreadsIdLocked?: boolean;
@@ -239,6 +244,9 @@ export interface BookMetadata {
   audibleIdLocked?: boolean;
   audibleRatingLocked?: boolean;
   audibleReviewCountLocked?: boolean;
+  applebooksIdLocked?: boolean;
+  applebooksRatingLocked?: boolean;
+  applebooksReviewCountLocked?: boolean;
   coverUpdatedOnLocked?: boolean;
   authorsLocked?: boolean;
   categoriesLocked?: boolean;
@@ -267,6 +275,7 @@ export interface MetadataClearFlags {
   seriesTotal?: boolean;
   isbn13?: boolean;
   isbn10?: boolean;
+  openlibraryId?: boolean;
   asin?: boolean;
   goodreadsId?: boolean;
   comicvineId?: boolean;
@@ -288,6 +297,9 @@ export interface MetadataClearFlags {
   audibleId?: boolean;
   audibleRating?: boolean;
   audibleReviewCount?: boolean;
+  applebooksId?: boolean;
+  applebooksRating?: boolean;
+  applebooksReviewCount?: boolean;
   narrator?: boolean;
   abridged?: boolean;
   authors?: boolean;
@@ -336,6 +348,7 @@ export interface EbookViewerSetting {
   fontFamily: string | null;
   isDark: boolean;
   flow: 'paginated' | 'scrolled';
+  tapToTurnPage?: boolean;
 }
 
 export interface CbxViewerSetting {

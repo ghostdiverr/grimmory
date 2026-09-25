@@ -33,7 +33,6 @@ export interface MetadataMatchWeights {
 export interface OidcProviderDetails {
   providerName: string;
   clientId: string;
-  clientSecret?: string;
   issuerUri: string;
   scopes?: string;
   claimMapping: {
@@ -52,6 +51,7 @@ export interface OidcAutoProvisionDetails {
 }
 
 export interface MetadataProviderSettings {
+  openLibrary: OpenLibrary;
   amazon: Amazon;
   google: Google;
   goodReads: Goodreads;
@@ -62,6 +62,11 @@ export interface MetadataProviderSettings {
   lubimyczytac: Lubimyczytac;
   audible: Audible;
   babelio: Babelio;
+  appleBooks: AppleBooks;
+}
+
+export interface OpenLibrary {
+  enabled: boolean;
 }
 
 export interface Amazon {
@@ -112,6 +117,11 @@ export interface Babelio {
   enabled: boolean;
   userLogin: string;
   password: string;
+}
+
+export interface AppleBooks {
+  enabled: boolean;
+  country: string;
 }
 
 export interface FormatWriteSettings {
@@ -192,6 +202,7 @@ export interface AppSettings {
   remoteAuthEnabled: boolean;
   oidcEnabled: boolean;
   oidcProviderDetails: OidcProviderDetails;
+  oidcProviderClientSecret: string | null;
   oidcRedirectUris: string[];
   oidcAutoProvisionDetails: OidcAutoProvisionDetails;
   maxFileUploadSizeInMb: number;
@@ -210,6 +221,7 @@ export interface AppSettings {
 }
 
 export interface MetadataProviderSpecificFields {
+  openlibraryId: boolean;
   asin: boolean;
   amazonRating: boolean;
   amazonReviewCount: boolean;
@@ -229,6 +241,9 @@ export interface MetadataProviderSpecificFields {
   audibleId: boolean;
   audibleRating: boolean;
   audibleReviewCount: boolean;
+  applebooksId: boolean;
+  applebooksRating: boolean;
+  applebooksReviewCount: boolean;
 }
 
 export enum AppSettingKey {
@@ -242,6 +257,7 @@ export enum AppSettingKey {
   KOMGA_GROUP_UNKNOWN = 'KOMGA_GROUP_UNKNOWN',
   OIDC_ENABLED = 'OIDC_ENABLED',
   OIDC_PROVIDER_DETAILS = 'OIDC_PROVIDER_DETAILS',
+  OIDC_PROVIDER_CLIENT_SECRET = 'OIDC_PROVIDER_CLIENT_SECRET',
   OIDC_REDIRECT_URIS = 'OIDC_REDIRECT_URIS',
   OIDC_AUTO_PROVISION_DETAILS = 'OIDC_AUTO_PROVISION_DETAILS',
   MAX_FILE_UPLOAD_SIZE_IN_MB = 'MAX_FILE_UPLOAD_SIZE_IN_MB',
